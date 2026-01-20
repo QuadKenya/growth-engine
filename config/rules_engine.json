@@ -1,0 +1,83 @@
+{
+  "version": "2025.1",
+  "description": "Vetting Logic for Curafa Franchisees",
+  
+  "scoring_model": {
+    "gate_1": [
+      {
+        "id": "profession_score",
+        "input_field": "current_profession",
+        "weight": 0.04,
+        "mapping": {
+          "Clinical Officer": 1.0,
+          "Doctor": 1.0,
+          "Nurse": 0.75,
+          "Allied Health Professional": 0.50,
+          "Other": 0.25,
+          "_default": 0.0
+        }
+      },
+      {
+        "id": "experience_score",
+        "input_field": "experience_years",
+        "weight": 0.04,
+        "mapping": {
+          "3-4+ Years": 1.0,
+          "3-4 Years": 1.0,
+          "2-3 years": 0.75,
+          "1-2 Years": 0.50,
+          "None": 0.0,
+          "_default": 0.0
+        }
+      },
+      {
+        "id": "business_score",
+        "input_field": "has_business_exp",
+        "weight": 0.04,
+        "mapping": {
+          "Yes": 1.0,
+          "No": 0.0,
+          "_default": 0.0
+        }
+      },
+      {
+        "id": "proximate_fit_score",
+        "input_field": "location_county_input",
+        "weight": 0.04,
+        "logic_type": "territory_match", 
+        "description": "1.0 if input matches a valid territory in territories.json"
+      },
+      {
+        "id": "offering_fit_score",
+        "input_field": "location_status_input",
+        "weight": 0.04,
+        "logic_type": "pass_through",
+        "default_value": 1.0,
+        "description": "Assumed 1.0 for MVP unless outside white space"
+      }
+    ]
+  },
+
+  "thresholds": {
+    "max_score": 0.20,
+    "classifications": [
+      { "label": "Ideal Fit", "min_score": 0.19 },
+      { "label": "Good Fit", "min_score": 0.17 },
+      { "label": "Conditional Fit", "min_score": 0.15 },
+      { "label": "Not A Fit", "min_score": 0.00 }
+    ]
+  },
+
+  "readiness_maps": {
+    "financial": {
+      "ready": ["cash available", "fully funded", "liquid capital", "adequate resources"],
+      "nurture": ["loan", "savings", "partnership", "assistance"],
+      "not_ready": ["do not have resources"]
+    },
+    "location": {
+      "ready": ["own", "lease", "found ideal"],
+      "nurture": ["potential communities", "in mind"],
+      "not_ready": ["need assistance", "no location"]
+    }
+  }
+}

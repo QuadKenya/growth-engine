@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FranchiseeLead",
+  "type": "object",
+  "required": ["email", "first_name", "last_name", "phone", "current_profession"],
+  "properties": {
+    "lead_id": { "type": "string", "description": "Unique Identifier (Email or Generated)" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "email": { "type": "string", "format": "email" },
+    "first_name": { "type": "string" },
+    "last_name": { "type": "string" },
+    "phone": { "type": "string", "pattern": "^[0-9+ ]+$" },
+    "source": { "type": "string", "default": "Web" },
+    
+    "current_profession": { 
+      "type": "string", 
+      "description": "Current Profession / Business" 
+    },
+    "experience_years": { 
+      "type": "string", 
+      "description": "How long have you worked as a healthcare provider?" 
+    },
+    "has_business_exp": { 
+      "type": "string", 
+      "description": "Do you have any experience managing a healthcare business?" 
+    },
+    "certifications": { "type": "string" },
+    
+    "financial_readiness_input": { 
+      "type": "string", 
+      "description": "Which of the following best describes your current financial readiness?" 
+    },
+    "location_county_input": { 
+      "type": "string", 
+      "description": "What is your target county?" 
+    },
+    "location_status_input": { 
+      "type": "string", 
+      "description": "Do you already have a physical location?" 
+    }
+  }
+}

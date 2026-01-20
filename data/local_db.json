@@ -1,0 +1,25 @@
+[
+  {
+    "lead_id": "jane@test.com",
+    "timestamp": "2026-01-20 13:09:16.395003",
+    "email": "jane@test.com",
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "phone": "254700123456",
+    "source": "Web",
+    "current_profession": "Nurse",
+    "experience_years": "3-4+ Years",
+    "has_business_exp": "No",
+    "certifications": null,
+    "financial_readiness_input": "I have adequate resources (cash available)",
+    "location_county_input": "Nairobi",
+    "location_status_input": "No, but I have potential communities in mind",
+    "stage": "POTENTIAL_FIT",
+    "fit_score": 0.15,
+    "fit_classification": "Conditional Fit",
+    "financial_readiness": "\ud83d\udfe2 Ready",
+    "location_readiness": "\ud83d\udfe0 Nurture",
+    "draft_message": "TO: jane@test.com\nCHANNEL: WhatsApp\n\nHabari Jane! \ud83d\udc4b\n\nWe reviewed your application to become a Curafa franchisee. We are impressed by your 3-4+ Years experience as a Nurse.\n\nYou have been identified as a Conditional Fit. Are you free next Tuesday for a 15-min intro call?",
+    "next_step_due_date": "2026-01-27"
+  }
+]
