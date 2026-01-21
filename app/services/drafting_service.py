@@ -2,73 +2,53 @@ import time
 from app.core.config import settings
 from app.models.domain import Lead
 
-# Optional: Import OpenAI if API key exists
-try:
-    from openai import OpenAI
-    client = OpenAI(api_key=settings.OPENAI_API_KEY) if settings.OPENAI_API_KEY else None
-except ImportError:
-    client = None
-
 class DraftingService:
     def __init__(self):
         self.system_prompt = settings.SYSTEM_PROMPT
 
     def generate_draft(self, lead: Lead, template_key: str) -> str:
-        """
-        Decides whether to use Real AI or Mock AI based on .env
-        """
-        if settings.OPENAI_API_KEY and client:
-            return self._generate_with_gpt(lead, template_key)
-        else:
-            return self._generate_mock(lead, template_key)
-
-    def _generate_mock(self, lead: Lead, template_key: str) -> str:
-        """Simulation Mode: Fills a simple f-string."""
-        time.sleep(0.5) # Simulate latency
+        # In a real app, this calls OpenAI. 
+        # Here we simulate the specific templates defined in your SOP.
+        time.sleep(0.5) 
         
-        header = f"TO: {lead.email}\nCHANNEL: WhatsApp\n\n"
+        header = f"TO: {lead.email}\nCHANNEL: WhatsApp (+{lead.phone})\n\n"
         
+        # --- SCENARIO A: NEW LEAD (The "Potential Fit") ---
         if template_key == "invite_to_call":
             return header + (
                 f"Habari {lead.first_name}! 👋\n\n"
-                f"We reviewed your application to become a Curafa franchisee. "
-                f"We are impressed by your {lead.experience_years} experience as a {lead.current_profession}.\n\n"
-                f"You have been identified as a {lead.fit_classification}. "
+                f"We reviewed your application for the {lead.location_county_input} region. "
+                f"Given your {lead.experience_years} experience as a {lead.current_profession}, "
+                f"we think you could be a great fit for Curafa.\n\n"
                 f"Are you free next Tuesday for a 15-min intro call?"
             )
         
+        # --- SCENARIO B: REJECTION (The "No Fit") ---
         elif template_key == "rejection_notice":
             return header + (
                 f"Dear {lead.first_name},\n\n"
-                f"Thank you for your interest in Access Afya. "
-                f"At this time, we are proceeding with other candidates for the {lead.location_county_input} region.\n\n"
-                f"We encourage you to apply again in the future."
+                f"Thank you for applying to Access Afya. "
+                f"This year's process is very competitive. Unfortunately, based on our current territory criteria, "
+                f"we cannot proceed with your application at this time.\n\n"
+                f"We will keep your details for future opportunities."
             )
-        
-        return header + "[Draft Generation Error: Unknown Template]"
 
-    def _generate_with_gpt(self, lead: Lead, template_key: str) -> str:
-        """Production Mode: Calls OpenAI."""
-        user_prompt = f"""
-        TASK: Draft a message for template '{template_key}'.
-        
-        CANDIDATE DATA:
-        Name: {lead.first_name} {lead.last_name}
-        Profession: {lead.current_profession}
-        County: {lead.location_county_input}
-        Score: {lead.fit_score} ({lead.fit_classification})
-        Financial Readiness: {lead.financial_readiness}
-        """
-        
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0.7
-        )
-        return response.choices[0].message.content
+        # --- SCENARIO C: THE NUDGE (Stuck in 'Potential Fit') ---
+        elif template_key == "nudge_booking":
+            return header + (
+                f"Hi {lead.first_name}, just checking in! \n\n"
+                f"We still have a slot open for an intro call this week to discuss the franchise opportunity. "
+                f"Please let us know if you are still interested?"
+            )
 
-# Singleton
+        # --- SCENARIO D: THE PROPOSAL CHASER (Stuck in 'Initial Convo') ---
+        elif template_key == "nudge_proposal":
+            return header + (
+                f"Hi {lead.first_name}, hope you are well.\n\n"
+                f"Just a gentle reminder to submit your Business Proposal form. "
+                f"Remember, our team is available on Thursday if you need help with the financials section."
+            )
+
+        return header + "[Draft Error: Unknown Template]"
+
 drafter = DraftingService()

@@ -9,150 +9,170 @@ import pandas as pd
 import time
 from app.db.supabase import db
 from app.services.workflow_service import workflow
-from app.services.drafting_service import drafter
-from app.core.config import settings
 
-# --- CONFIG ---
+# --- PAGE CONFIG ---
 st.set_page_config(
     page_title="Access Afya | Vetting Control Tower",
     page_icon="🏥",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# --- STYLING ---
+# --- CSS STYLING ---
 st.markdown("""
 <style>
-    .metric-card {
-        background-color: #f0f2f6;
-        padding: 20px;
-        border-radius: 10px;
-        border-left: 5px solid #1a4593;
-    }
-    .stButton>button {
-        width: 100%;
-    }
+    .badge-ideal { background-color: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .badge-warn { background-color: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    .badge-error { background-color: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- SIDEBAR: SIMULATION ---
+# --- SIDEBAR: SIMULATION LAB ---
 with st.sidebar:
-    st.image("https://www.accessafya.com/wp-content/uploads/2020/10/Access-Afya-Logo.png", width=200)
-    st.title("Simulation Lab")
-    st.markdown("Inject test data to trigger the Agent.")
+    st.header("🧪 Simulation Lab")
     
-    with st.form("sim_form"):
-        fname = st.text_input("First Name", "Jane")
-        lname = st.text_input("Last Name", "Doe")
-        email = st.text_input("Email", "jane@test.com")
-        prof = st.selectbox("Profession", ["Nurse", "Clinical Officer", "Shopkeeper", "Doctor"])
-        exp = st.selectbox("Experience", ["3-4+ Years", "1-2 Years", "None"])
-        finance = st.selectbox("Financials", ["I have adequate resources (cash available)", "I need a loan"])
-        county = st.selectbox("County", ["Nairobi", "Mombasa", "Turkana"])
-        
-        submitted = st.form_submit_button("🚀 Inject Lead")
-        
-        if submitted:
-            # Construct payload matching Lead model
-            payload = {
-                "lead_id": email,
-                "email": email,
-                "first_name": fname,
-                "last_name": lname,
-                "phone": "0700123456",
-                "current_profession": prof,
-                "experience_years": exp,
-                "has_business_exp": "No",
-                "financial_readiness_input": finance,
-                "location_county_input": county,
-                "location_status_input": "No, but I have potential communities in mind"
-            }
+    with st.expander("1️⃣ Ingest New Lead", expanded=True):
+        with st.form("sim_ingest"):
+            # Using unique email logic to prevent overwriting same ID
+            timestamp_id = int(time.time())
+            email_default = f"candidate_{timestamp_id}@test.com"
             
-            with st.spinner("Agent is vetting..."):
-                workflow.process_incoming_lead(payload)
-                time.sleep(1) # Visual pause
-            st.success("Lead processed! Check Inbox.")
+            email = st.text_input("Email (ID)", email_default)
+            fname = st.text_input("Name", "John")
+            prof = st.selectbox("Role", ["Nurse", "Clinical Officer", "Shopkeeper"])
+            exp = st.selectbox("Experience", ["3-4+ Years", "1-2 Years", "None"])
+            finance = st.selectbox("Finance", ["I have adequate resources (cash available)", "I need a loan"])
+            
+            if st.form_submit_button("🚀 Inject Lead"):
+                payload = {
+                    "lead_id": email, 
+                    "email": email, 
+                    "first_name": fname, 
+                    "last_name": "Doe",
+                    "phone": "0700000000", 
+                    "current_profession": prof, 
+                    "experience_years": exp,
+                    "has_business_exp": "No", 
+                    "financial_readiness_input": finance,
+                    "location_county_input": "Nairobi", 
+                    "location_status_input": "No"
+                }
+                
+                with st.spinner("Agent is vetting..."):
+                    workflow.process_incoming_lead(payload)
+                    time.sleep(0.5) # Allow FS to sync
+                
+                st.success("Lead Ingested!")
+                time.sleep(0.5)
+                st.rerun()
 
-# --- MAIN AREA ---
-st.title("Growth Coordinator Dashboard")
+    with st.expander("2️⃣ Time Travel (Nudge Test)"):
+        if st.button("☀️ Run Daily Checks"):
+            count = workflow.run_sla_checks()
+            if count > 0:
+                st.success(f"Generated {count} Nudges!")
+            else:
+                st.info("No candidates need nudging.")
+            time.sleep(1)
+            st.rerun()
+            
+    st.divider()
+    if st.button("🗑️ Reset Database", type="primary"):
+        db.reset_db()
+        st.toast("Database cleared!")
+        time.sleep(1)
+        st.rerun()
 
-# Top Level Metrics
-leads = db.fetch_all_leads()
-pending_drafts = len([l for l in leads if l.draft_message])
+# --- MAIN DASHBOARD ---
+st.title("Growth Coordinator Dashboard 🗼")
+
+# Load Data
+try:
+    leads = db.fetch_all_leads()
+except Exception as e:
+    st.error(f"Database Error: {e}")
+    leads = []
+
+# Filtering Logic
+pending_drafts = [l for l in leads if l.draft_message]
 total_vetted = len(leads)
 ideal_fits = len([l for l in leads if l.fit_classification == "Ideal Fit"])
 
+# Metrics
 c1, c2, c3 = st.columns(3)
-c1.metric("Pending Approvals", pending_drafts, delta_color="inverse")
-c2.metric("Total Pipeline", total_vetted)
-c3.metric("Ideal Fits", ideal_fits)
+c1.metric("📥 Inbox (Pending)", len(pending_drafts))
+c2.metric("📊 Total Pipeline", total_vetted)
+c3.metric("⭐ Ideal Fits", ideal_fits)
 
 # Tabs
-tab_inbox, tab_tracker = st.tabs(["📥 Inbox (Needs Action)", "📊 Pipeline Tracker"])
+tab_inbox, tab_tracker = st.tabs(["📥 Inbox & Approvals", "📋 Master Tracker"])
 
 # --- TAB 1: INBOX ---
 with tab_inbox:
-    to_approve = [l for l in leads if l.draft_message]
+    if not pending_drafts:
+        st.info("🎉 Inbox is empty! Inject a lead or run checks to generate tasks.")
     
-    if not to_approve:
-        st.info("🎉 All caught up! No drafts pending approval.")
-    
-    for lead in to_approve:
-        with st.expander(f"{lead.fit_classification} | {lead.first_name} {lead.last_name} | {lead.stage}", expanded=True):
-            col_left, col_right = st.columns([2, 1])
+    for lead in pending_drafts:
+        with st.container():
+            # Header
+            st.markdown(f"### {lead.first_name} {lead.last_name}")
+            
+            col_left, col_right = st.columns([1, 2])
             
             with col_left:
-                st.subheader("📝 Review Draft")
-                # Editable Text Area
-                edited_draft = st.text_area(
-                    label="Edit before sending:",
-                    value=lead.draft_message,
-                    height=250,
+                st.caption("CANDIDATE DATA")
+                # Badge
+                if lead.fit_classification == "Ideal Fit":
+                    st.markdown('<span class="badge-ideal">Ideal Fit</span>', unsafe_allow_html=True)
+                elif lead.fit_classification == "Not A Fit":
+                    st.markdown('<span class="badge-error">No Fit</span>', unsafe_allow_html=True)
+                else:
+                    st.markdown(f'<span class="badge-warn">{lead.fit_classification}</span>', unsafe_allow_html=True)
+                
+                st.write(f"**Score:** `{lead.fit_score:.2f}`")
+                st.write(f"**Role:** {lead.current_profession}")
+                st.write(f"**Financial:** {lead.financial_readiness}")
+                
+            with col_right:
+                st.caption(f"DRAFT ACTION: {lead.stage}")
+                
+                # Editable Draft
+                new_draft = st.text_area(
+                    "Review Message:", 
+                    value=lead.draft_message, 
+                    height=150,
                     key=f"draft_{lead.lead_id}"
                 )
                 
-                btn_col1, btn_col2 = st.columns(2)
-                if btn_col1.button("✅ Approve & Send", key=f"approve_{lead.lead_id}"):
-                    # In real app: Update draft content with edit, then send
-                    lead.draft_message = edited_draft 
-                    db.upsert_lead(lead) 
+                b1, b2 = st.columns([1, 4])
+                if b1.button("✅ Send", key=f"send_{lead.lead_id}"):
+                    lead.draft_message = new_draft # Save edit
+                    db.upsert_lead(lead)
                     workflow.approve_draft(lead.lead_id)
-                    st.toast(f"Message sent to {lead.first_name}!")
+                    st.toast(f"Sent to {lead.first_name}!")
+                    time.sleep(0.5)
                     st.rerun()
-                
-                if btn_col2.button("✋ Reject / Flag", key=f"flag_{lead.lead_id}"):
-                    st.warning("Flagging feature coming in v2")
 
-            with col_right:
-                st.subheader("🔍 Context")
-                st.markdown(f"**Score:** `{lead.fit_score * 100:.1f}%`")
-                st.markdown(f"**Prof:** {lead.current_profession}")
-                st.markdown(f"**Exp:** {lead.experience_years}")
-                st.markdown(f"**Finance:** {lead.financial_readiness}")
-                st.markdown(f"**Location:** {lead.location_readiness}")
-                st.markdown("---")
-                st.markdown(f"**Rec:** {lead.fit_classification}")
+            st.divider()
 
 # --- TAB 2: TRACKER ---
 with tab_tracker:
     if leads:
-        # Convert to DataFrame for nice table
-        df = pd.DataFrame([l.dict() for l in leads])
+        # Prepare Table Data
+        data = []
+        for l in leads:
+            data.append({
+                "ID": l.lead_id,
+                "Date": l.timestamp,
+                "Name": f"{l.first_name} {l.last_name}",
+                "Stage": l.stage,
+                "Score": l.fit_score,
+                "Class": l.fit_classification,
+                "Draft Waiting?": "✅ Yes" if l.draft_message else "No",
+                "Action Due": l.next_step_due_date
+            })
         
-        # Select and Rename Columns for readability
-        display_cols = [
-            "timestamp", "first_name", "last_name", "stage", 
-            "fit_score", "fit_classification", "financial_readiness"
-        ]
-        
-        # Safety check if cols exist
-        available_cols = [c for c in display_cols if c in df.columns]
-        
-        st.dataframe(
-            df[available_cols].style.applymap(
-                lambda v: "color: green; font-weight: bold" if v == "Ideal Fit" else "", 
-                subset=["fit_classification"]
-            ),
-            use_container_width=True
-        )
+        df = pd.DataFrame(data)
+        st.dataframe(df, use_container_width=True, hide_index=True)
     else:
-        st.write("No data in pipeline.")
+        st.write("No data found.")

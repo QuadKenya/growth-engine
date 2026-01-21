@@ -12,14 +12,8 @@ class WorkflowService:
     def process_incoming_lead(self, raw_data: dict) -> Lead:
         """
         End-to-End processing of a new Webhook.
-        1. Create Lead
-        2. Score Lead
-        3. Transition State
-        4. Draft Message
-        5. Persist
         """
         # 1. Create Object (Validates Schema)
-        # Assuming raw_data keys match Lead model fields or aliases
         lead = Lead(**raw_data)
         
         # 2. Score
@@ -36,24 +30,64 @@ class WorkflowService:
         )
 
         # 4. State Transition (Gate 1 Logic)
-        # In a full State Machine, we'd lookup 'FRANCHISEE_VETTED' transitions.
-        # Hardcoded for MVP flow:
         if lead.fit_classification == "Not A Fit":
-            self._transition_to(lead, PipelineStage.NO_FIT)
+            self._transition_to(lead, PipelineStage.NO_FIT, "rejection_notice")
         else:
-            self._transition_to(lead, PipelineStage.POTENTIAL_FIT)
+            self._transition_to(lead, PipelineStage.POTENTIAL_FIT, "invite_to_call")
 
         # 5. Persist
         return db.upsert_lead(lead)
 
-    def _transition_to(self, lead: Lead, new_stage: PipelineStage):
+    def run_sla_checks(self) -> int:
+        """
+        Iterates all leads. Checks if they are stuck. Generates Nudges.
+        Returns number of nudges created.
+        """
+        leads = db.fetch_all_leads()
+        nudges_generated = 0
+        now = datetime.now()
+
+        for lead in leads:
+            # Skip if already has a draft waiting (don't double draft)
+            if lead.draft_message:
+                continue
+
+            # LOGIC: If in POTENTIAL_FIT for > 3 days (Simulated), Nudge
+            if lead.stage == PipelineStage.POTENTIAL_FIT:
+                # Robust timestamp parsing
+                try:
+                    ts_str = str(lead.timestamp)
+                    # Handle both formats if they exist (ISO vs simple)
+                    if "T" in ts_str:
+                        lead_date = datetime.strptime(ts_str.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+                    else:
+                        lead_date = datetime.strptime(ts_str.split(".")[0], "%Y-%m-%d %H:%M:%S")
+                except:
+                    # Fallback if timestamp is messy, assume it's old
+                    lead_date = now - timedelta(days=10)
+
+                # Using 0 days for simulation purposes so you see it instantly
+                if (now - lead_date).days >= 0: 
+                    lead.draft_message = drafter.generate_draft(lead, "nudge_booking")
+                    lead.next_step_due_date = now.strftime("%Y-%m-%d")
+                    db.upsert_lead(lead)
+                    nudges_generated += 1
+            
+            # LOGIC: If in INITIAL_CONVO > 7 days, Nudge Proposal
+            elif lead.stage == PipelineStage.INITIAL_CONVO:
+                lead.draft_message = drafter.generate_draft(lead, "nudge_proposal")
+                db.upsert_lead(lead)
+                nudges_generated += 1
+
+        return nudges_generated
+
+    def _transition_to(self, lead: Lead, new_stage: PipelineStage, template: str = None):
         """
         Handles entry actions for a new state (e.g., Drafting).
         """
         lead.stage = new_stage
         
         # Look up config for this state
-        # e.g. "POTENTIAL_FIT"
         state_def = self.state_config["states"].get(new_stage.value, {})
         
         # A. Apply SLA
@@ -61,12 +95,9 @@ class WorkflowService:
             due = datetime.now() + timedelta(days=state_def["sla_days"])
             lead.next_step_due_date = due.strftime("%Y-%m-%d")
             
-        # B. Trigger Entry Actions (Drafting)
-        if "on_entry" in state_def:
-            action = state_def["on_entry"]
-            if action["action"] == "draft_message":
-                template = action["template"]
-                lead.draft_message = drafter.generate_draft(lead, template)
+        # B. Generate Draft if requested
+        if template:
+            lead.draft_message = drafter.generate_draft(lead, template)
 
     def approve_draft(self, lead_id: str):
         """
@@ -77,18 +108,14 @@ class WorkflowService:
         lead = db.get_lead(lead_id)
         if not lead: return
         
-        # Logic: If sitting in Potential Fit with a draft, move to Initial Convo
-        if lead.stage == PipelineStage.POTENTIAL_FIT:
-            lead.draft_message = None # Email sent
-            # Note: Real state machine might wait for "Call Completed"
-            # For MVP, we assume Approval = Invite Sent -> Wait for Call
-            pass 
+        # Scenario: Approving the first invite
+        if lead.stage == PipelineStage.FRANCHISEE_VETTED:
+            lead.stage = PipelineStage.POTENTIAL_FIT
         
-        elif lead.stage == PipelineStage.NO_FIT:
-             lead.draft_message = None
-             lead.stage = PipelineStage.TURNED_DOWN
-             
+        # Scenario: Approving a Nudge
+        # (State stays same, just timestamp update implicitly)
+        
+        lead.draft_message = None # Email sent
         db.upsert_lead(lead)
 
-# Singleton
 workflow = WorkflowService()
