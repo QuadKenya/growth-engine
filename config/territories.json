@@ -1,7 +1,31 @@
 {
-  "Nairobi": ["Kibera", "Mukuru", "Mathare", "Kawangware", "Kayole", "Dandora", "Embakasi"],
-  "Kiambu": ["Thika", "Ruiru", "Githurai", "Kiambu Town"],
-  "Nakuru": ["Nakuru Town", "Naivasha"],
-  "Mombasa": ["Likoni", "Nyali", "Changamwe"],
-  "Kajiado": ["Ongata Rongai", "Kitengela", "Ngong"]
+  "description": "Validation source for Proximate Fit (Gate 1)",
+  "valid_counties": [
+    "Nairobi", 
+    "Kiambu", 
+    "Mombasa", 
+    "Nakuru", 
+    "Kajiado"
+  ],
+  "location_map": {
+    "Kibera": "Nairobi",
+    "Mukuru": "Nairobi",
+    "Mathare": "Nairobi",
+    "Kawangware": "Nairobi",
+    "Kayole": "Nairobi",
+    "Dandora": "Nairobi",
+    "Embakasi": "Nairobi",
+    "Thika": "Kiambu",
+    "Ruiru": "Kiambu",
+    "Githurai": "Kiambu",
+    "Kiambu Town": "Kiambu",
+    "Likoni": "Mombasa",
+    "Nyali": "Mombasa",
+    "Changamwe": "Mombasa",
+    "Nakuru Town": "Nakuru",
+    "Naivasha": "Nakuru",
+    "Ongata Rongai": "Kajiado",
+    "Kitengela": "Kajiado",
+    "Ngong": "Kajiado"
+  }
 }

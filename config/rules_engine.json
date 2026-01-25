@@ -1,6 +1,6 @@
 {
-  "version": "2025.1",
-  "description": "Vetting Logic for Curafa Franchisees",
+  "version": "2025.2",
+  "description": "Vetting Logic for Curafa Franchisees (Aligned with SOP 2025)",
   
   "scoring_model": {
     "gate_1": [
@@ -45,7 +45,7 @@
         "input_field": "location_county_input",
         "weight": 0.04,
         "logic_type": "territory_match", 
-        "description": "1.0 if input matches a valid territory in territories.json"
+        "description": "1.0 if input matches a valid territory or sub-county in territories.json"
       },
       {
         "id": "offering_fit_score",
@@ -61,10 +61,26 @@
   "thresholds": {
     "max_score": 0.20,
     "classifications": [
-      { "label": "Ideal Fit", "min_score": 0.19 },
-      { "label": "Good Fit", "min_score": 0.17 },
-      { "label": "Conditional Fit", "min_score": 0.15 },
-      { "label": "Not A Fit", "min_score": 0.00 }
+      { 
+        "label": "Ideal Fit", 
+        "min_score": 0.20,
+        "description": "Perfect Score (5/5 criteria). Must match doc standard."
+      },
+      { 
+        "label": "Good Fit", 
+        "min_score": 0.19,
+        "description": "High score, maybe one minor mismatch (e.g., Nurse vs Doctor)."
+      },
+      { 
+        "label": "Fair/Conditional Fit", 
+        "min_score": 0.17,
+        "description": "Meets minimums, but borderline. Requires strict nurturing."
+      },
+      { 
+        "label": "Not A Fit", 
+        "min_score": 0.00,
+        "description": "Below 17% threshold (0.17). Reject immediately."
+      }
     ]
   },
 

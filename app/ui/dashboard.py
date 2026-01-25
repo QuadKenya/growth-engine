@@ -7,6 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 import streamlit as st
 import pandas as pd
 import time
+from datetime import datetime # <--- FIXED: Added this import
 from app.db.supabase import db
 from app.services.workflow_service import workflow
 
@@ -33,36 +34,49 @@ with st.sidebar:
     
     with st.expander("1️⃣ Ingest New Lead", expanded=True):
         with st.form("sim_ingest"):
-            # Using unique email logic to prevent overwriting same ID
+            # Identity Inputs
             timestamp_id = int(time.time())
             email_default = f"candidate_{timestamp_id}@test.com"
-            
             email = st.text_input("Email (ID)", email_default)
-            fname = st.text_input("Name", "John")
-            prof = st.selectbox("Role", ["Nurse", "Clinical Officer", "Shopkeeper"])
+            
+            c1, c2 = st.columns(2)
+            fname = c1.text_input("First Name", "John")
+            lname = c2.text_input("Last Name", "Kamau") 
+            mname = st.text_input("Middle Name (Optional)", "") 
+            
+            # Vetting Inputs
+            prof = st.selectbox("Role", ["Clinical Officer", "Nurse", "Shopkeeper", "Doctor", "Allied Health Professional"])
             exp = st.selectbox("Experience", ["3-4+ Years", "1-2 Years", "None"])
+            # FIXED: Added Business Exp Dropdown to allow High Scores
+            biz_exp = st.selectbox("Business Experience?", ["Yes", "No"]) 
+            
+            # Readiness Inputs
             finance = st.selectbox("Finance", ["I have adequate resources (cash available)", "I need a loan"])
+            # Testing Territory Logic
+            location = st.selectbox("Location/Ward", ["Nairobi", "Kibera", "Thika", "London (Invalid)"])
             
             if st.form_submit_button("🚀 Inject Lead"):
                 payload = {
                     "lead_id": email, 
                     "email": email, 
                     "first_name": fname, 
-                    "last_name": "Doe",
+                    "middle_name": mname if mname else None,
+                    "last_name": lname,
                     "phone": "0700000000", 
                     "current_profession": prof, 
                     "experience_years": exp,
-                    "has_business_exp": "No", 
+                    "has_business_exp": biz_exp, # FIXED: Uses dropdown value
                     "financial_readiness_input": finance,
-                    "location_county_input": "Nairobi", 
-                    "location_status_input": "No"
+                    "location_county_input": location, 
+                    "location_status_input": "No",
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S") # FIXED: Datetime now works
                 }
                 
                 with st.spinner("Agent is vetting..."):
                     workflow.process_incoming_lead(payload)
-                    time.sleep(0.5) # Allow FS to sync
+                    time.sleep(0.5) 
                 
-                st.success("Lead Ingested!")
+                st.success(f"Lead {fname} {lname} Ingested!")
                 time.sleep(0.5)
                 st.rerun()
 
@@ -114,14 +128,12 @@ with tab_inbox:
     
     for lead in pending_drafts:
         with st.container():
-            # Header
             st.markdown(f"### {lead.first_name} {lead.last_name}")
             
             col_left, col_right = st.columns([1, 2])
             
             with col_left:
                 st.caption("CANDIDATE DATA")
-                # Badge
                 if lead.fit_classification == "Ideal Fit":
                     st.markdown('<span class="badge-ideal">Ideal Fit</span>', unsafe_allow_html=True)
                 elif lead.fit_classification == "Not A Fit":
@@ -131,12 +143,11 @@ with tab_inbox:
                 
                 st.write(f"**Score:** `{lead.fit_score:.2f}`")
                 st.write(f"**Role:** {lead.current_profession}")
-                st.write(f"**Financial:** {lead.financial_readiness}")
+                st.write(f"**Target:** {lead.location_county_input}") 
                 
             with col_right:
                 st.caption(f"DRAFT ACTION: {lead.stage}")
                 
-                # Editable Draft
                 new_draft = st.text_area(
                     "Review Message:", 
                     value=lead.draft_message, 
@@ -146,7 +157,7 @@ with tab_inbox:
                 
                 b1, b2 = st.columns([1, 4])
                 if b1.button("✅ Send", key=f"send_{lead.lead_id}"):
-                    lead.draft_message = new_draft # Save edit
+                    lead.draft_message = new_draft 
                     db.upsert_lead(lead)
                     workflow.approve_draft(lead.lead_id)
                     st.toast(f"Sent to {lead.first_name}!")
@@ -158,7 +169,6 @@ with tab_inbox:
 # --- TAB 2: TRACKER ---
 with tab_tracker:
     if leads:
-        # Prepare Table Data
         data = []
         for l in leads:
             data.append({
@@ -168,8 +178,8 @@ with tab_tracker:
                 "Stage": l.stage,
                 "Score": l.fit_score,
                 "Class": l.fit_classification,
-                "Draft Waiting?": "✅ Yes" if l.draft_message else "No",
-                "Action Due": l.next_step_due_date
+                "Last Contact": l.last_contact_date, 
+                "Notes": l.notes 
             })
         
         df = pd.DataFrame(data)

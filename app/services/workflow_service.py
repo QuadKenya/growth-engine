@@ -13,7 +13,7 @@ class WorkflowService:
         """
         End-to-End processing of a new Webhook.
         """
-        # 1. Create Object (Validates Schema)
+        # 1. Create Object (Validates Schema & Parses Timestamp)
         lead = Lead(**raw_data)
         
         # 2. Score
@@ -34,8 +34,7 @@ class WorkflowService:
             self._transition_to(lead, PipelineStage.NO_FIT, "rejection_notice")
         else:
             self._transition_to(lead, PipelineStage.POTENTIAL_FIT, "invite_to_call")
-
-        # 5. Persist
+            
         return db.upsert_lead(lead)
 
     def run_sla_checks(self) -> int:
@@ -48,25 +47,17 @@ class WorkflowService:
         now = datetime.now()
 
         for lead in leads:
-            # Skip if already has a draft waiting (don't double draft)
-            if lead.draft_message:
-                continue
+            if lead.draft_message: continue
 
             # LOGIC: If in POTENTIAL_FIT for > 3 days (Simulated), Nudge
             if lead.stage == PipelineStage.POTENTIAL_FIT:
-                # Robust timestamp parsing
-                try:
-                    ts_str = str(lead.timestamp)
-                    # Handle both formats if they exist (ISO vs simple)
-                    if "T" in ts_str:
-                        lead_date = datetime.strptime(ts_str.split(".")[0], "%Y-%m-%dT%H:%M:%S")
-                    else:
-                        lead_date = datetime.strptime(ts_str.split(".")[0], "%Y-%m-%d %H:%M:%S")
-                except:
-                    # Fallback if timestamp is messy, assume it's old
-                    lead_date = now - timedelta(days=10)
+                # Safe date conversion using Pydantic's parsed timestamp
+                lead_date = lead.timestamp
+                if isinstance(lead_date, str):
+                    # Fallback if string persisted
+                    lead_date = datetime.strptime(lead_date.split(".")[0], "%Y-%m-%d %H:%M:%S")
 
-                # Using 0 days for simulation purposes so you see it instantly
+                # Simulation Mode: 0 days to trigger instantly
                 if (now - lead_date).days >= 0: 
                     lead.draft_message = drafter.generate_draft(lead, "nudge_booking")
                     lead.next_step_due_date = now.strftime("%Y-%m-%d")
@@ -82,40 +73,41 @@ class WorkflowService:
         return nudges_generated
 
     def _transition_to(self, lead: Lead, new_stage: PipelineStage, template: str = None):
-        """
-        Handles entry actions for a new state (e.g., Drafting).
-        """
         lead.stage = new_stage
         
-        # Look up config for this state
         state_def = self.state_config["states"].get(new_stage.value, {})
         
-        # A. Apply SLA
         if "sla_days" in state_def:
             due = datetime.now() + timedelta(days=state_def["sla_days"])
             lead.next_step_due_date = due.strftime("%Y-%m-%d")
             
-        # B. Generate Draft if requested
         if template:
             lead.draft_message = drafter.generate_draft(lead, template)
 
     def approve_draft(self, lead_id: str):
         """
-        Human clicked 'Approve'.
-        1. Clear draft.
-        2. Move state forward.
+        Human clicked 'Approve'. Updates contact timestamp and stage.
         """
         lead = db.get_lead(lead_id)
         if not lead: return
-        
-        # Scenario: Approving the first invite
+
+        # 1. Update Pipeline Stage
         if lead.stage == PipelineStage.FRANCHISEE_VETTED:
             lead.stage = PipelineStage.POTENTIAL_FIT
         
-        # Scenario: Approving a Nudge
-        # (State stays same, just timestamp update implicitly)
+        # 2. Pipeline Integrity: Update Contact Meta-Data
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        lead.last_contact_date = now_str
         
-        lead.draft_message = None # Email sent
+        # Infer channel from the draft (Simulation logic)
+        if lead.draft_message and "WhatsApp" in lead.draft_message:
+            lead.last_contact_channel = "WhatsApp"
+        else:
+            lead.last_contact_channel = "Email"
+
+        # 3. Clear Draft
+        lead.draft_message = None 
+        
         db.upsert_lead(lead)
 
 workflow = WorkflowService()

@@ -9,7 +9,7 @@ class ScoringService:
 
     def calculate_score(self, lead: Lead) -> Dict[str, Any]:
         """
-        Iterates through the 'gate_1' scoring model defined in JSON.
+        Iterates through the scoring model defined in JSON.
         Returns total score and classification.
         """
         model = self.config["scoring_model"]["gate_1"]
@@ -28,14 +28,20 @@ class ScoringService:
             # Logic Type A: Direct Mapping (e.g., Nurse = 0.75)
             if "mapping" in criterion:
                 mapping = criterion["mapping"]
-                # Try exact match, then default
                 points = mapping.get(user_input, mapping.get("_default", 0.0))
             
-            # Logic Type B: Territory Match (e.g., Lives in Nairobi)
+            # Logic Type B: Territory Match (Active Gatekeeper)
             elif criterion.get("logic_type") == "territory_match":
-                # Check if input matches a key in territories.json
-                if user_input in self.territories:
+                # Clean input (Title Case)
+                clean_input = str(user_input).strip().title()
+                
+                # Check 1: Is it a valid County?
+                if clean_input in self.territories.get("valid_counties", []):
                     points = 1.0
+                # Check 2: Is it a valid Sub-County/Ward? (Reverse Lookup)
+                elif clean_input in self.territories.get("location_map", {}):
+                    points = 1.0
+                    # (Optional) We could normalize the lead's county here if we wanted
                 else:
                     points = 0.0
             
@@ -72,7 +78,7 @@ class ScoringService:
 
     def determine_readiness(self, text: str, category: str) -> str:
         """Checks for keywords in text (Financial/Location)."""
-        text = text.lower()
+        text = str(text).lower()
         maps = self.config["readiness_maps"][category]
         
         if any(k in text for k in maps["ready"]):
