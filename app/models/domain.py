@@ -1,94 +1,100 @@
 from pydantic import BaseModel, Field, EmailStr, validator
 from enum import Enum
-from typing import Optional
+from typing import Optional, Dict, List, Any
 from datetime import datetime
 
-# --- Enums matching the 2025 Modified File validation lists ---
 class PipelineStage(str, Enum):
+    # Gate 1: Vetting
     EXPRESSED_INTEREST = "EXPRESSED_INTEREST"
-    FRANCHISEE_VETTED = "FRANCHISEE_VETTED"
+    NO_FIT = "NO_FIT"             # Hard Rejection
+    WARM_LEAD = "WARM_LEAD"       # Soft Rejection / Parked
+    
+    # Gate 2: Prioritization & Interest
     POTENTIAL_FIT = "POTENTIAL_FIT"
-    NO_FIT = "NO_FIT"
+    INTEREST_CHECK_SENT = "INTEREST_CHECK_SENT"
+    NEUTRAL_NURTURE = "NEUTRAL_NURTURE"
+    
+    # Gate 3: Screening
+    FAQ_SENT = "FAQ_SENT"
+    READY_FOR_CALL = "READY_FOR_CALL"
+    
+    # Gate 4: Proposal & Compliance
     INITIAL_CONVO = "INITIAL_CONVO"
     BUSINESS_PROPOSAL = "BUSINESS_PROPOSAL"
-    INACTIVE = "INACTIVE"
+    KYC_SCREENING = "KYC_SCREENING"
+    FINANCIAL_ASSESSMENT = "FINANCIAL_ASSESSMENT"
+    
+    # Gate 5: Assessment
+    ASSESSMENT_PSYCH = "ASSESSMENT_PSYCH"
+    ASSESSMENT_INTERVIEW = "ASSESSMENT_INTERVIEW"
+    
+    # Gate 6: Site & Contract
+    SITE_SEARCH = "SITE_SEARCH"
+    SITE_VETTING = "SITE_VETTING"
+    CONTRACTING = "CONTRACTING"
+    CONTRACT_CLOSED = "CONTRACT_CLOSED"
+    
     TURNED_DOWN = "TURNED_DOWN"
+    INACTIVE = "INACTIVE"
 
 class Lead(BaseModel):
-    """
-    The canonical Candidate entity.
-    Reflects columns in the '2025 Modified File' and 'Flat File'.
-    """
-    
-    # --- Identity (Cols A, B, C, D) ---
-    lead_id: str = Field(description="Unique ID (Email is used for MVP)")
-    # Robust timestamp handling for 'Flat File' Col A
-    timestamp: datetime = Field(default_factory=datetime.now, description="Application Date")
-    
+    # --- Identity ---
+    lead_id: str
+    timestamp: datetime = Field(default_factory=datetime.now)
     email: EmailStr
     first_name: str
-    middle_name: Optional[str] = None # Added per Flat File Col D analysis
+    middle_name: Optional[str] = None
     last_name: str
     phone: str
-    source: str = "Web"
     
-    # --- Inputs (From Google Form) ---
+    # --- Inputs (Gate 1) ---
     current_profession: str
     experience_years: str
     has_business_exp: str
-    certifications: Optional[str] = None
     financial_readiness_input: str
     location_county_input: str
     location_status_input: str
-
-    # --- Computed State (Managed by Agent) ---
+    
+    # --- Clinic Conversion Meta Data (Optional) ---
+    facility_meta: Dict[str, Any] = {}
+    
+    # --- Gate 1: Vetting State ---
     stage: PipelineStage = PipelineStage.EXPRESSED_INTEREST
     fit_score: float = 0.0
     fit_classification: str = "Unscored"
-    financial_readiness: str = "Unknown" 
-    location_readiness: str = "Unknown"
     
-    # --- Workflow / Tracker Fields (Cols C, E, F) ---
+    # --- Gate 2: Prioritization ---
+    priority_rank: int = 3  # 1=Site Ready, 2=Cash Ready, 3=Standard
+    rejection_type: Optional[str] = None  # "Hard", "Soft"
+    wake_up_date: Optional[str] = None    # For Warm Leads
+    soft_rejection_reason: Optional[str] = None
+    
+    # --- Gate 3: Engagement ---
     draft_message: Optional[str] = None
-    next_step_due_date: Optional[str] = None
-    notes: Optional[str] = None  # Added for Column C (Associate Comments)
+    notes: Optional[str] = None
+    preferred_call_time: Optional[str] = None
     
-    # Critical for SOP Inactive Rule (Column E)
-    last_contact_date: Optional[str] = None 
-    # Critical for reporting (Column F)
-    last_contact_channel: Optional[str] = None 
+    # --- Gate 4: Compliance ---
+    # Stores { "Document Name": True/False }
+    checklist_status: Dict[str, bool] = {} 
+    checklist_type: str = "KYC_Individual" # or KYB_Clinic_Conversion
+    
+    # --- Tracking ---
+    last_contact_date: Optional[str] = None
+    last_contact_channel: Optional[str] = None
 
     class Config:
         use_enum_values = True
         populate_by_name = True
 
-    # --- Validators ---
-
     @validator("timestamp", pre=True)
     def parse_timestamp(cls, v):
-        """
-        Handles incoming timestamps from Google Forms (M/D/Y) or ISO format.
-        """
         if isinstance(v, datetime): return v
         if not v: return datetime.now()
-        
-        # List of expected formats
-        formats = [
-            "%m/%d/%Y %H:%M:%S", # Google Forms default
-            "%Y-%m-%dT%H:%M:%S", # ISO
-            "%Y-%m-%d %H:%M:%S"  # DB standard
-        ]
-        
-        for fmt in formats:
-            try:
-                # Clean up millisecond decimals if present
-                clean_v = str(v).split('.')[0]
-                return datetime.strptime(clean_v, fmt)
-            except ValueError:
-                continue
-        
-        # Fallback if parsing fails
-        return datetime.now()
+        try:
+            return datetime.strptime(str(v).split('.')[0], "%Y-%m-%d %H:%M:%S")
+        except:
+            return datetime.now()
 
     @validator("phone")
     def clean_phone(cls, v):

@@ -1,0 +1,35 @@
+{
+  "KYC_Individual": [
+    "Application Form",
+    "Intro to AA Signed",
+    "National ID / Passport",
+    "KRA PIN",
+    "Good Conduct Cert",
+    "CRB Clearance",
+    "Bank Statements (6 Months)",
+    "Proof of Residence",
+    "CV / Experience Proof",
+    "Valid Clinical License"
+  ],
+  "KYB_Clinic_Conversion": [
+    "Application Form",
+    "Intro to AA Signed",
+    "Cert of Incorporation / CR12",
+    "Company KRA PIN",
+    "Director IDs",
+    "Business Permit",
+    "Tax Compliance Cert",
+    "Clinic Operating License",
+    "Pharmacy License (If applicable)",
+    "Facility Bank Statements",
+    "Staff List & Licenses",
+    "Revenue/Footfall Reports"
+  ],
+  "Gate_6_Contracting": [
+    "Director Photos",
+    "Inventory of Assets",
+    "Lease Agreement / Title",
+    "Proof of Franchise Fee Payment",
+    "Signed Contract Agreement"
+  ]
+}

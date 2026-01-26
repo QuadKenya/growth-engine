@@ -7,85 +7,92 @@ class ScoringService:
         self.config = settings.RULES_CONFIG
         self.territories = settings.TERRITORIES
 
+    def check_hard_gates(self, lead: Lead) -> Dict[str, Any]:
+        """Returns {passed: bool, reason: str}"""
+        gates = self.config["hard_gates"]
+        
+        # 1. Business Exp
+        if lead.has_business_exp == gates["biz_exp"]:
+            return {"passed": False, "reason": "No Business Experience"}
+            
+        # 2. Financial Absolute Fail
+        if lead.financial_readiness_input == gates["financial_status"]:
+            return {"passed": False, "reason": "Lack of Capital (Hard No)"}
+            
+        # 3. Clinic Conversion Checks (Only if facility_meta exists)
+        if lead.facility_meta.get("is_clinic_owner") == "Yes":
+            conv_gates = gates["clinic_conversion_failures"]
+            if lead.facility_meta.get("is_llc") == conv_gates["is_llc"]:
+                return {"passed": False, "reason": "Clinic not LLC"}
+            if lead.facility_meta.get("kmpdc_reg") == conv_gates["kmpdc"]:
+                return {"passed": False, "reason": "Clinic not KMPDC Registered"}
+            # Add other conversion checks as needed
+        
+        return {"passed": True, "reason": None}
+
+    def determine_priority(self, lead: Lead) -> int:
+        """Calculates Rank 1 (Hot), 2 (Funded), 3 (Standard)"""
+        prio_config = self.config["prioritization"]
+        
+        # Rank 1: Site Ready
+        if lead.location_status_input == prio_config["rank_1_criteria"]["location_status"]:
+            return 1
+            
+        # Rank 2: Cash Ready (But no site)
+        # Using simple string matching from config
+        if prio_config["rank_2_criteria"]["financial_status"] in lead.financial_readiness_input:
+            return 2
+            
+        return 3
+
+    def is_soft_rejection(self, lead: Lead) -> Dict[str, Any]:
+        """Checks if failure is due to Experience, Planning, or Location (Warm Lead)"""
+        soft_logic = self.config["soft_rejection_logic"]
+        
+        # Exp Check
+        if lead.experience_years in soft_logic["experience"]:
+            return {"is_soft": True, "reason": "experience"}
+            
+        # Finance Check (Planning)
+        if any(x in lead.financial_readiness_input for x in soft_logic["financial"]):
+            return {"is_soft": True, "reason": "financial"}
+
+        # Location Check (Searching)
+        if any(x in lead.location_status_input for x in soft_logic["location"]):
+            return {"is_soft": True, "reason": "location"}
+            
+        return {"is_soft": False, "reason": "hard"}
+
     def calculate_score(self, lead: Lead) -> Dict[str, Any]:
-        """
-        Iterates through the scoring model defined in JSON.
-        Returns total score and classification.
-        """
         model = self.config["scoring_model"]["gate_1"]
         total_score = 0.0
-        breakdown = []
-
-        # Convert Pydantic model to dict for easy lookup
+        
         lead_data = lead.dict()
-
+        
         for criterion in model:
-            field = criterion["input_field"]
-            weight = criterion["weight"]
-            user_input = lead_data.get(field)
+            input_val = lead_data.get(criterion["input_field"])
             points = 0.0
             
-            # Logic Type A: Direct Mapping (e.g., Nurse = 0.75)
             if "mapping" in criterion:
                 mapping = criterion["mapping"]
-                points = mapping.get(user_input, mapping.get("_default", 0.0))
-            
-            # Logic Type B: Territory Match (Active Gatekeeper)
-            elif criterion.get("logic_type") == "territory_match":
-                # Clean input (Title Case)
-                clean_input = str(user_input).strip().title()
+                points = mapping.get(input_val, mapping.get("_default", 0.0))
                 
-                # Check 1: Is it a valid County?
-                if clean_input in self.territories.get("valid_counties", []):
+            elif criterion.get("logic_type") == "territory_match":
+                clean_loc = str(input_val).title()
+                if clean_loc in self.territories.get("location_map", {}) or \
+                   clean_loc in self.territories.get("valid_counties", []):
                     points = 1.0
-                # Check 2: Is it a valid Sub-County/Ward? (Reverse Lookup)
-                elif clean_input in self.territories.get("location_map", {}):
-                    points = 1.0
-                    # (Optional) We could normalize the lead's county here if we wanted
-                else:
-                    points = 0.0
-            
-            # Logic Type C: Pass Through (Assumed 1.0 for MVP)
+                    
             elif criterion.get("logic_type") == "pass_through":
-                points = criterion.get("default_value", 0.0)
+                points = criterion.get("default_value", 1.0)
+                
+            total_score += (points * criterion["weight"])
 
-            # Calculate Weighted Score
-            weighted_points = points * weight
-            total_score += weighted_points
-            
-            breakdown.append({
-                "criterion": criterion.get("id"),
-                "input": user_input,
-                "points": points,
-                "weighted": weighted_points
-            })
-
-        return {
-            "score": round(total_score, 4),
-            "breakdown": breakdown
-        }
+        return {"score": round(total_score, 4)}
 
     def classify_score(self, score: float) -> str:
-        """Determines 'Ideal Fit' vs 'No Fit' based on thresholds."""
-        thresholds = self.config["thresholds"]["classifications"]
-        # Sort by min_score descending to find the highest match
-        thresholds.sort(key=lambda x: x["min_score"], reverse=True)
-        
-        for t in thresholds:
-            if score >= t["min_score"]:
-                return t["label"]
+        for t in self.config["thresholds"]["classifications"]:
+            if score >= t["min_score"]: return t["label"]
         return "Not A Fit"
 
-    def determine_readiness(self, text: str, category: str) -> str:
-        """Checks for keywords in text (Financial/Location)."""
-        text = str(text).lower()
-        maps = self.config["readiness_maps"][category]
-        
-        if any(k in text for k in maps["ready"]):
-            return "🟢 Ready"
-        if any(k in text for k in maps["nurture"]):
-            return "🟠 Nurture"
-        return "🔴 Not Ready"
-
-# Singleton
 scorer = ScoringService()
