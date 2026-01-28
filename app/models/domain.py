@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, EmailStr, validator
 from enum import Enum
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any, Union
 from datetime import datetime
 
 class PipelineStage(str, Enum):
@@ -37,6 +37,23 @@ class PipelineStage(str, Enum):
     TURNED_DOWN = "TURNED_DOWN"
     INACTIVE = "INACTIVE"
 
+class ActivityType(str, Enum):
+    TRANSITION = "TRANSITION"
+    NOTE = "NOTE"
+    EMAIL = "EMAIL"
+    ACTION = "ACTION"
+    SYSTEM = "SYSTEM"
+
+class ActivityLogEntry(BaseModel):
+    timestamp: datetime = Field(default_factory=datetime.now)
+    author: str = "System"  # "System" or "Associate"
+    type: ActivityType = ActivityType.SYSTEM
+    content: str
+    stage_snapshot: Optional[str] = None
+
+    class Config:
+        use_enum_values = True
+
 class Lead(BaseModel):
     # --- Identity ---
     lead_id: str
@@ -71,13 +88,27 @@ class Lead(BaseModel):
     
     # --- Gate 3: Engagement ---
     draft_message: Optional[str] = None
-    notes: Optional[str] = None
     preferred_call_time: Optional[str] = None
     
-    # --- Gate 4: Compliance ---
-    # Stores { "Document Name": True/False }
+    # --- Gate 4: Compliance & Financials ---
     checklist_status: Dict[str, bool] = {} 
-    checklist_type: str = "KYC_Individual" # or KYB_Clinic_Conversion
+    checklist_type: str = "KYC_Individual"
+    verified_financial_capital: Optional[float] = None
+    
+    # --- Gate 5: Assessment ---
+    psychometric_score: Optional[str] = None
+    interview_notes: Optional[str] = None
+    interview_date: Optional[str] = None
+    
+    # --- Gate 6: Site & Contract ---
+    site_visit_score: Optional[float] = None
+    site_location_details: Optional[str] = None
+    contract_generated_date: Optional[str] = None
+    
+    # --- Audit & History ---
+    # Notes are now part of activity_log, but we keep this field optional for backward compat
+    notes: Optional[str] = None 
+    activity_log: List[ActivityLogEntry] = []
     
     # --- Tracking ---
     last_contact_date: Optional[str] = None
@@ -92,6 +123,9 @@ class Lead(BaseModel):
         if isinstance(v, datetime): return v
         if not v: return datetime.now()
         try:
+            # Handles string timestamp often found in JSON
+            if "T" in str(v):
+                return datetime.fromisoformat(str(v))
             return datetime.strptime(str(v).split('.')[0], "%Y-%m-%d %H:%M:%S")
         except:
             return datetime.now()

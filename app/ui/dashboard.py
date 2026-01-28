@@ -10,6 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 import streamlit as st
 import pandas as pd
 import time
+import streamlit.components.v1 as components
 
 from app.db.supabase import db
 from app.services.workflow_service import workflow
@@ -23,7 +24,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# --- CUSTOM CSS (Theme-aware: light + dark mode friendly) ---
+# --- CUSTOM CSS ---
 st.markdown(
     """
 <style>
@@ -52,10 +53,8 @@ st.markdown(
   .lead-card.hot { border-left-color: #ff4757; }
   .lead-card.warm { border-left-color: #ffa502; }
   .lead-card.compliance { border-left-color: #2ed573; }
-
-  .lead-card h1, .lead-card h2, .lead-card h3, .lead-card p, .lead-card span, .lead-card div {
-    color: var(--text) !important;
-  }
+  .lead-card.late-stage { border-left-color: #a55eea; }
+  .lead-card.closed { border-left-color: #2ed573; border-left-width: 8px; }
 
   .status-badge {
     padding: 4px 12px;
@@ -70,62 +69,48 @@ st.markdown(
   .status-warm { background-color: #ffa502; }
   .status-new { background-color: #3742fa; }
   .status-success { background-color: #2ed573; }
+  .status-purple { background-color: #a55eea; }
 
-  div[data-testid="stMetric"] {
-    background: var(--card-bg) !important;
-    color: var(--text) !important;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.10);
+  .activity-log {
+    max-height: 200px;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.02);
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    margin-bottom: 10px;
   }
+  .log-entry {
+    margin-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
+  }
+  .log-meta { font-size: 0.8em; color: #888; }
 
-  div[data-testid="stDataFrame"] {
-    background: var(--card-bg) !important;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-  }
-
-  .aa-logo-wrap {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 6px 0 14px 0;
-    margin: 0;
-  }
-  .aa-logo {
-    width: 200px;
-    max-width: 200px;
-    height: auto;
-    display: block;
-  }
+  /* Streamlit 1.53.1: make ONLY the metric label bigger (keep numbers unchanged) */
+    [data-testid="stMetric"] [data-testid="stMetricLabel"],
+    [data-testid="stMetric"] [data-testid="stMetricLabel"] * {
+    font-size: 1.6rem !important;   /* <- increase/decrease this */
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+ }
 </style>
 """,
     unsafe_allow_html=True,
 )
 
-# --- LOGO (Local asset; reliable + deploy-safe) ---
+# --- LOGO & ASSETS ---
 LOGO_PATH = Path(__file__).resolve().parent / "assets" / "access_afya_logo.png"
 if not LOGO_PATH.exists():
     LOGO_PATH = Path(__file__).resolve().parent.parent / "assets" / "access_afya_logo.png"
 
-
 def render_sidebar_logo(path: Path):
-    if not path.exists():
-        st.warning(f"Logo missing. Expected at: {path}")
-        return
-    b64 = base64.b64encode(path.read_bytes()).decode("utf-8")
-    st.markdown(
-        f"""
-        <div class="aa-logo-wrap">
-          <img class="aa-logo" src="data:image/png;base64,{b64}" alt="Access Afya logo"/>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    if path.exists():
+        st.sidebar.image(str(path), width=200)
+    else:
+        st.sidebar.title("Access Afya")
 
-
-# --- HELPER: RESET DB (as in original V2) ---
+# --- HELPER: RESET DB ---
 def reset_database():
     file_path = os.path.join(os.path.dirname(__file__), "../../data/local_db.json")
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -135,18 +120,23 @@ def reset_database():
     time.sleep(1)
     st.rerun()
 
-
 def _safe_str(x) -> str:
-    if x is None:
-        return ""
-    return str(x)
+    return str(x) if x is not None else ""
 
+# --- HELPER: SEARCH FUNCTIONALITY ---
+def filter_leads(leads, query):
+    if not query:
+        return leads
+    q = query.lower()
+    return [
+        l for l in leads 
+        if q in _safe_str(getattr(l, "first_name", "")).lower() 
+        or q in _safe_str(getattr(l, "last_name", "")).lower()
+        or q in _safe_str(getattr(l, "email", "")).lower()
+    ]
 
+# --- HELPER: DATE RANGE NORMALIZATION ---
 def _normalize_date_range(dr):
-    """
-    Streamlit date_input may return date, tuple(date,date), or list[date].
-    Normalize to (start_date, end_date) as date objects.
-    """
     if isinstance(dr, (list, tuple)):
         if len(dr) == 2:
             return dr[0], dr[1]
@@ -156,23 +146,82 @@ def _normalize_date_range(dr):
         return today, today
     return dr, dr
 
+# --- HELPER: RENDER ACTIVITY LOG (FIXED) ---
+def render_activity_feed(lead):
+    logs = getattr(lead, "activity_log", []) or []
 
-# --- HELPER: RENDER LEAD CARD (standard UX for pipeline tabs) ---
+    # Input for new note
+    new_note_content = st.text_input("Note Content", key=f"note_content_{getattr(lead,'lead_id','')}", placeholder="Type note here")
+    add_button = st.button("Add Note", key=f"add_button_{getattr(lead,'lead_id','')}")
+
+    if add_button and new_note_content:
+        workflow.add_note(lead.lead_id, new_note_content)
+        st.toast("Note Added")
+        time.sleep(0.5)
+        st.rerun()
+    
+    st.divider()
+    
+    if not logs:
+        st.caption("No activity recorded.")
+    else:
+        # Helper to safely get attributes from either dict or Pydantic object
+        def get_log_val(obj, attr, default=None):
+            if isinstance(obj, dict):
+                return obj.get(attr, default)
+            return getattr(obj, attr, default)
+
+        # Sort newest first
+        logs = sorted(logs, key=lambda x: get_log_val(x, 'timestamp') or '', reverse=True)
+        
+        # Use a container with a fixed height and scrolling
+        with st.container(height=250):
+            for log in logs:
+                ts_raw = get_log_val(log, 'timestamp')
+                try:
+                    # Format timestamp
+                    if isinstance(ts_raw, str):
+                        dt = datetime.fromisoformat(str(ts_raw).replace('Z', ''))
+                    else:
+                        dt = ts_raw
+                    ts_str = dt.strftime("%b %d, %H:%M")
+                except:
+                    ts_str = str(ts_raw)[:16]
+
+                author = get_log_val(log, 'author', 'System')
+                content = get_log_val(log, 'content', '')
+                icon = "🤖" if author == "System" else "👤"
+                
+                st.markdown(f"""
+                <div class="log-box">
+                    <div class="log-meta">{icon} <b>{author}</b> • {ts_str}</div>
+                    <div class="log-content">{content}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+# --- HELPER: RENDER LEAD CARD ---
 def render_lead_card(lead):
     css_class = "lead-card"
-    badge_html = f'<span class="status-badge status-new">{_safe_str(getattr(lead, "stage", ""))}</span>'
+    stage = getattr(lead, "stage", "")
+    badge_html = f'<span class="status-badge status-new">{stage}</span>'
 
     if getattr(lead, "priority_rank", None) == 1:
         css_class += " hot"
         badge_html = '<span class="status-badge status-hot">🔥 Rank 1: Site Ready</span>'
     elif getattr(lead, "priority_rank", None) == 2:
         badge_html = '<span class="status-badge status-warm">💰 Rank 2: Cash Ready</span>'
-    elif getattr(lead, "stage", None) == "WARM_LEAD":
+    elif stage == "WARM_LEAD":
         css_class += " warm"
         badge_html = '<span class="status-badge status-warm">🌤️ Nurture</span>'
-    elif getattr(lead, "stage", None) == "KYC_SCREENING":
+    elif stage == "KYC_SCREENING":
         css_class += " compliance"
         badge_html = '<span class="status-badge status-success">📂 Compliance</span>'
+    elif stage in ["FINANCIAL_ASSESSMENT", "ASSESSMENT_PSYCH", "SITE_SEARCH"]:
+        css_class += " late-stage"
+        badge_html = f'<span class="status-badge status-purple">{stage}</span>'
+    elif stage == "CONTRACT_CLOSED":
+        css_class += " closed"
+        badge_html = '<span class="status-badge status-success">✅ Contracted</span>'
 
     with st.container():
         st.markdown(
@@ -190,15 +239,17 @@ def render_lead_card(lead):
         )
 
         with st.expander("View Details & Actions", expanded=False):
-            # Added a 4th column specifically for Notes
-            col_data, col_draft, col_actions, col_notes = st.columns([1, 2, 1, 1], gap="small")
+            # Layout: Data | Agent/Action | Log
+            col_data, col_action, col_log = st.columns([1, 1.5, 1.5], gap="medium")
 
             with col_data:
-                st.caption("CANDIDATE PROFILE")
+                st.caption("PROFILE")
                 st.write(f"**Role:** {_safe_str(getattr(lead, 'current_profession', ''))}")
-                st.write(f"**Exp:** {_safe_str(getattr(lead, 'experience_years', ''))}")
-                st.write(f"**Loc:** {_safe_str(getattr(lead, 'location_county_input', ''))}")
-                st.write(f"**Fin:** {_safe_str(getattr(lead, 'financial_readiness_input', ''))}")
+                st.write(f"**Work Experience:** {_safe_str(getattr(lead, 'experience_years', ''))}")
+                st.write(f"**County:** {_safe_str(getattr(lead, 'location_county_input', ''))}")
+                st.write(f"**Biz Experience:** {_safe_str(getattr(lead, 'has_business_exp', ''))}")
+                st.write(f"**Finances:** {_safe_str(getattr(lead, 'financial_readiness_input', ''))}")
+                st.write(f"**Location:** {_safe_str(getattr(lead, 'location_status_input', ''))}")
                 st.write(f"**Stage:** {_safe_str(getattr(lead, 'stage', ''))}")
                 
                 # Show Rejection/Nurture reason if applicable
@@ -206,271 +257,328 @@ def render_lead_card(lead):
                      st.write(f"**Reason:** {_safe_str(getattr(lead, 'soft_rejection_reason', ''))}")
                      st.write(f"**Wake Up:** {_safe_str(getattr(lead, 'wake_up_date', ''))}")
 
+                if getattr(lead, "verified_financial_capital", None):
+                    st.success(f"**Verified Cap:** KES {getattr(lead, 'verified_financial_capital')}")
                 st.caption(f"Applied: {_safe_str(getattr(lead, 'timestamp', ''))}")
 
-            with col_draft:
-                st.caption("🤖 AGENT WORKSPACE")
-
+            with col_action:
+                st.caption("ACTIONS")
+                
+                # --- DRAFTING SECTION ---
                 if getattr(lead, "draft_message", None):
-                    st.info("Draft Pending Review")
-                    txt = st.text_area(
-                        "Edit Message:",
-                        value=_safe_str(getattr(lead, "draft_message", "")),
-                        height=120,
-                        key=f"d_{getattr(lead,'lead_id','')}",
-                    )
-
-                    c_save, c_send = st.columns(2)
-                    if c_save.button("💾 Save Draft", key=f"save_{getattr(lead,'lead_id','')}", use_container_width=True):
-                        if hasattr(workflow, "update_draft"):
-                            workflow.update_draft(lead.lead_id, txt)
-                        else:
-                            lead.draft_message = txt
-                            db.upsert_lead(lead)
-                        st.toast("Draft saved")
-                        time.sleep(0.2)
+                    st.info("Draft Pending")
+                    txt = st.text_area("Edit:", value=lead.draft_message, height=100, key=f"d_{lead.lead_id}")
+                    if st.button("✅ Approve & Send", key=f"s_{lead.lead_id}", width="stretch"):
+                        workflow.approve_draft(lead.lead_id, message_override=txt)
+                        st.toast("Sent!")
+                        time.sleep(0.5)
                         st.rerun()
 
-                    if c_send.button("✅ Approve & Send", key=f"s_{getattr(lead,'lead_id','')}", use_container_width=True):
-                        try:
-                            workflow.approve_draft(lead.lead_id, message_override=txt) 
-                        except TypeError:
-                            if hasattr(workflow, "update_draft"):
-                                workflow.update_draft(lead.lead_id, txt)
-                            else:
-                                lead.draft_message = txt
-                                db.upsert_lead(lead)
-                            workflow.approve_draft(lead.lead_id)
-
-                        st.balloons()
-                        time.sleep(0.8)
-                        st.rerun()
-
-                elif getattr(lead, "stage", None) == "INTEREST_CHECK_SENT":
+                if stage == "INTEREST_CHECK_SENT":
                     st.warning("Waiting for Reply...")
                     b1, b2 = st.columns(2)
-                    if b1.button("Replied YES", key=f"y_{getattr(lead,'lead_id','')}"):
+                    if b1.button("Replied YES", key=f"y_{lead.lead_id}", width='stretch'):
                         workflow.handle_interest_response(lead.lead_id, "YES")
                         st.rerun()
-                    if b2.button("Replied LATER", key=f"m_{getattr(lead,'lead_id','')}"):
+                    if b2.button("Replied LATER", key=f"m_{lead.lead_id}", width='stretch'):
                         workflow.handle_interest_response(lead.lead_id, "MAYBE")
                         st.rerun()
 
-                elif getattr(lead, "stage", None) == "KYC_SCREENING":
-                    st.success("Proposal Approved")
-                    items = getattr(lead, "checklist_status", None) or {}
-                    total = len(items)
-
-                    if total == 0:
-                        st.info("No checklist configured.")
-                    else:
-                        completed = sum(1 for v in items.values() if v)
-                        st.progress(completed / total)
-                        missing_docs = [k for k, v in items.items() if not v]
-                        st.write(f"**Pending Docs:** {len(missing_docs)}")
-
-                        with st.popover("Open Checklist"):
-                            for item, status in items.items():
-                                chk = st.checkbox(item, value=status, key=f"{getattr(lead,'lead_id','')}_{item}")
-                                if chk != status:
-                                    workflow.update_checklist(lead.lead_id, item, chk)
-                                    st.rerun()
-                else:
-                    st.info("No active draft.")
-
-            with col_actions:
-                st.caption("MANUAL ACTIONS")
-
-                # Show Move to Warm unless already there or Rejected
-                if getattr(lead, "stage", "") not in ["WARM_LEAD", "TURNED_DOWN", "NO_FIT"]:
-                    if st.button("🌤️ Move to Warm", key=f"w_{getattr(lead,'lead_id','')}", use_container_width=True):
-                        if hasattr(workflow, "move_to_warm"):
-                            workflow.move_to_warm(lead.lead_id)
-                        else:
-                            lead.stage = "WARM_LEAD"
-                            lead.draft_message = None
-                            db.upsert_lead(lead)
-                        st.rerun()
-
-                if getattr(lead, "stage", "") not in ["TURNED_DOWN", "NO_FIT"]:
-                    if st.button("❌ Hard Reject", key=f"r_{getattr(lead,'lead_id','')}", use_container_width=True):
-                        reason = st.text_input("Rejection reason", key=f"rej_reason_{getattr(lead,'lead_id','')}") # Reason input inside card is tricky w/ rerun, simplified for now
-                        if hasattr(workflow, "hard_reject"):
-                            workflow.hard_reject(lead.lead_id)
-                        else:
-                            lead.stage = "TURNED_DOWN"
-                            lead.draft_message = None
-                            db.upsert_lead(lead)
-                        st.rerun()
+                # --- STAGE SPECIFIC ACTIONS ---
                 
-                # If Warm, maybe Reactivate?
-                if getattr(lead, "stage", "") == "WARM_LEAD":
-                    if st.button("♻️ Reactivate", key=f"re_{getattr(lead,'lead_id','')}", use_container_width=True):
-                        lead.stage = "EXPRESSED_INTEREST" # Reset to start of funnel validation
+                # Gate 3: Call Ready
+                if stage == "READY_FOR_CALL":
+                    st.success("Candidate is Ready for Intro Call")
+                    if st.button("✅ Call Complete / Start KYC", key=f"kyc_{lead.lead_id}", width="stretch"):
+                        workflow.initialize_checklist(lead.lead_id)
+                        st.balloons()
+                        time.sleep(1)
+                        st.rerun()
+
+                # Gate 4: Compliance Checklist
+                if stage == "KYC_SCREENING":
+                    items = getattr(lead, "checklist_status", {})
+                    if items:
+                        total = len(items)
+                        completed = sum(1 for v in items.values() if v)
+                        ratio = completed / total
+                        missing_count = total - completed
+
+                        st.progress(ratio, text=f"Progress: {int(ratio*100)}%")
+                        if missing_count > 0:
+                            st.caption(f"**{missing_count}** documents pending.")
+                        else:
+                            st.success("All documents verified! Moving to Financials...")
+
+                        with st.popover(f"📝 Manage Checklist ({completed}/{total})", width='stretch'):
+                            for item, status in items.items():
+                                c_chk, c_lbl = st.columns([0.1, 0.9])
+                                if st.checkbox(item, value=status, key=f"{lead.lead_id}_{item}") != status:
+                                    workflow.update_checklist(lead.lead_id, item, not status)
+                                    st.rerun()
+                    else:
+                        st.warning("No checklist initialized.")
+                
+                # Gate 4: Financials
+                if stage == "FINANCIAL_ASSESSMENT":
+                    amt = st.number_input("Verified Liquid Capital (KES)", min_value=0, step=10000, key=f"fin_{lead.lead_id}")
+                    if st.button("Submit Assessment", key=f"sub_fin_{lead.lead_id}"):
+                        workflow.submit_financial_assessment(lead.lead_id, amt)
+                        st.rerun()
+
+                # Gate 5: Psych & Interview
+                if stage == "ASSESSMENT_PSYCH":
+                    st.info("Psychometrics Link Sent.")
+                    if st.button("Mark Test Complete", key=f"psy_{lead.lead_id}"):
+                        lead.stage = "ASSESSMENT_INTERVIEW"
                         db.upsert_lead(lead)
                         st.rerun()
+                
+                if stage == "ASSESSMENT_INTERVIEW":
+                    res = st.radio("Interview Result", ["PASS", "FAIL"], key=f"int_res_{lead.lead_id}")
+                    note = st.text_input("Interview Notes", key=f"int_note_{lead.lead_id}")
+                    if st.button("Log Result", key=f"log_int_{lead.lead_id}"):
+                        workflow.log_interview_result(lead.lead_id, res, note)
+                        st.rerun()
 
-            # --- NEW: NOTES SECTION ---
-            with col_notes:
-                st.caption("📝 NOTES")
-                current_notes = getattr(lead, "notes", "") or ""
-                new_notes = st.text_area(
-                    "Associate Notes", 
-                    value=current_notes, 
-                    height=120,
-                    key=f"notes_{getattr(lead,'lead_id','')}",
-                    help="Internal notes. Click Save to persist."
-                )
-                if st.button("💾 Save Note", key=f"btn_note_{getattr(lead,'lead_id','')}", use_container_width=True):
-                    lead.notes = new_notes
-                    db.upsert_lead(lead)
-                    st.toast("Note saved successfully!")
-                    time.sleep(0.5)
-                    st.rerun()
+                # Gate 6: Site & Contract
+                if stage == "SITE_SEARCH":
+                    st.info("Candidate searching for site...")
+                    if st.button("Site Found / Vetting Req", key=f"sf_{lead.lead_id}"):
+                        lead.stage = "SITE_VETTING"
+                        db.upsert_lead(lead)
+                        st.rerun()
+                
+                if stage == "SITE_VETTING":
+                    score = st.slider("Site Score", 0, 100, 70, key=f"ss_{lead.lead_id}")
+                    if st.button("Finalize Site", key=f"fs_{lead.lead_id}"):
+                        workflow.finalize_site_vetting(lead.lead_id, score)
+                        st.rerun()
+
+                if stage == "CONTRACTING":
+                    st.success("Contract Generated!")
+                    if st.button("🎉 Close Contract", key=f"cc_{lead.lead_id}", width="stretch"):
+                        workflow.close_contract(lead.lead_id)
+                        st.balloons()
+                        st.rerun()
+                
+                if stage == "CONTRACT_CLOSED":
+                    st.success("Franchisee Onboarded")
+
+                # --- WARM LEAD SPECIFIC ACTIONS (Reactivate / Hard Reject) ---
+                if stage == "WARM_LEAD":
+                    # Layout: Compact side-by-side buttons
+                    c1, c2 = st.columns(2)
+                    if c1.button("♻️ Reactivate", key=f"react_{lead.lead_id}", width="stretch"):
+                        # Reset to Potential Fit (Rank Logic will keep them prioritized)
+                        lead.stage = "POTENTIAL_FIT" 
+                        lead.wake_up_date = None
+                        lead.soft_rejection_reason = None
+                        db.upsert_lead(lead)
+                        st.toast("Lead Reactivated!")
+                        time.sleep(0.5)
+                        st.rerun()
+                    
+                    if c2.button("❌ Reject", key=f"r_warm_{lead.lead_id}", width="stretch"):
+                        workflow.hard_reject(lead.lead_id)
+                        st.rerun()
+
+                # --- STANDARD ACTIONS (Move to Warm / Reject) ---
+                # Exclude Terminal stages AND Warm Leads (handled above)
+                elif stage not in ["TURNED_DOWN", "CONTRACT_CLOSED", "WARM_LEAD"]:
+                    # Layout: Compact side-by-side buttons
+                    c1, c2 = st.columns(2)
+                    if c1.button("🌤️ Warm", key=f"w_{lead.lead_id}", width="stretch"):
+                        workflow.move_to_warm(lead.lead_id)
+                        st.rerun()
+                    if c2.button("❌ Reject", key=f"r_{lead.lead_id}", width="stretch"):
+                        workflow.hard_reject(lead.lead_id)
+                        st.rerun()
+
+            with col_log:
+                st.caption("📝 ACTIVITY & NOTES")
+                render_activity_feed(lead)
 
 
-# --- SIDEBAR NAVIGATION + SIMULATION LAB ---
+# --- SIDEBAR & NAVIGATION ---
 with st.sidebar:
     render_sidebar_logo(LOGO_PATH)
-
     st.title("Growth Engine")
 
-    view_mode = st.radio(
-        "Pipeline Views",
-        [
-            "📥 Inbox (New Leads)",
-            "🔥 Hot Leads (Action Required)",
-            "🌤️ Warm Leads (Nurture)",
-            "💬 Engagement (Screening)",
-            "📂 Compliance (KYC/KYB)",
-            "🔍 Master Database",
-        ],
+    view_mode = st.radio("Pipeline Views", [
+        "📥 Inbox (New Leads)",
+        "🔥 Hot Leads (Action Required)",
+        "🌤️ Warm Leads (Nurture)",
+        "💬 Engagement (Screening)",
+        "📂 Compliance (KYC/KYB)",
+        "💰 Financial Assessment",
+        "🧠 Psychometric & Interview",
+        "📍 Site & Contract",
+        "✅ Contracted / Alumni",
+        "🔍 Master Database"
+    ],
+    key="view_mode",
     )
 
     st.divider()
-
+    
+    # Simulation Lab
     with st.expander("🧪 Simulation Lab"):
-        with st.form("sim_ingest"):
-            st.caption("Inject Test Candidate")
-            email = st.text_input("Email", f"test_{int(time.time())}@gmail.com")
-
+        with st.form("sim_ingest", clear_on_submit=True):
+            # CHANGED: Direct Text Input for Email
+            email = st.text_input("Email", placeholder="candidate@example.com")
+            
             c1, c2 = st.columns(2)
             fname = c1.text_input("First Name", "Jane")
             lname = c2.text_input("Last Name", "Doe")
-
-            prof = st.selectbox("Role", ["Clinical Officer", "Nurse", "Shopkeeper", "Medical Doctor"])
-
-            c3, c4 = st.columns(2)
-            exp = c3.selectbox("Exp", ["3-4+ Years", "1-2 Years", "None"])
-            biz_exp = c4.selectbox("Biz Exp?", ["Yes", "No"])
-
+            prof = st.selectbox("Role", ["Clinical Officer", "Nurse", "Medical Doctor", "Shopkeeper"])
+            exp = st.selectbox("Experience", ["3-4+ Years", "1-2 Years", "None"])
+            biz_exp = st.selectbox("Business Experience?", ["Yes", "No"])
             fin = st.selectbox("Finance", ["I have adequate resources", "I need a loan"])
+            county = st.selectbox("County", ["Nairobi", "Mombasa", "Kiambu", "Marsabit"])
+            loc = st.selectbox("Location", ["Yes, I own or lease a location", "No, but I have found ideal locations", "No"])
             
-            # FIXED: Added County Selector
-            # Using a simplified list for simulation
-            counties = ["Nairobi", "Mombasa", "Kiambu", "Nakuru", "Kajiado", "Marsabit", "London (Invalid)"]
-            county = st.selectbox("County", counties)
-            
-            loc_status = st.selectbox(
-                "Location Status",
-                ["Yes, I own or lease a location", "No, but I have found ideal locations", "No"],
-            )
-
             if st.form_submit_button("🚀 Inject Lead"):
+                # Use entered email or fallback to timestamp if empty (safety net)
+                final_email = email if email else f"test_{int(time.time())}@gmail.com"
+                
                 payload = {
-                    "lead_id": email,
-                    "email": email,
-                    "first_name": fname,
+                    "lead_id": final_email, 
+                    "email": final_email, 
+                    "first_name": fname, 
                     "last_name": lname,
-                    "phone": "0700000000",
-                    "current_profession": prof,
+                    "phone": "254700000000", 
+                    "current_profession": prof, 
                     "experience_years": exp,
-                    "has_business_exp": biz_exp,
+                    "has_business_exp": biz_exp, 
                     "financial_readiness_input": fin,
-                    "location_county_input": county, # FIXED: Using selected county
-                    "location_status_input": loc_status,
-                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "location_county_input": county, 
+                    "location_status_input": loc,
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 }
                 workflow.process_incoming_lead(payload)
-                st.toast("Candidate Injected Successfully!")
+                st.toast("Injected!")
                 time.sleep(1)
                 st.rerun()
-
+                
     st.divider()
-
     if st.button("🗑️ Reset Database"):
         reset_database()
-
 
 # --- MAIN DASHBOARD LOGIC ---
 leads = db.fetch_all_leads()
 
-# Metrics Bar (Always Visible)
+# Filter Helpers
+def get_leads_by_stage(stages):
+    return [l for l in leads if getattr(l, "stage", "") in stages]
+
+# Metrics
 m1, m2, m3, m4 = st.columns(4)
 m1.metric("Total Pipeline", len(leads))
-m2.metric("🔥 Action Required", len([l for l in leads if getattr(l, "draft_message", None)]))
-m3.metric("🌤️ Warm / Nurture", len([l for l in leads if getattr(l, "stage", None) == "WARM_LEAD"]))
-m4.metric("✅ Contracted", len([l for l in leads if getattr(l, "stage", None) == "CONTRACT_CLOSED"]))
+m2.metric("📝 Pending Drafts", len([l for l in leads if getattr(l, "draft_message", None)]))
+m3.metric("🌤️ Warm / Nurture", len(get_leads_by_stage(["WARM_LEAD"])))
+m4.metric("✅ Contracted", len(get_leads_by_stage(["CONTRACT_CLOSED"])))
 
 st.divider()
 
+# --- SEARCH BAR (COMMON FOR ACTIVE TABS) ---
+if view_mode != "🔍 Master Database":
+    search_q = st.text_input("🔍 Filter Leads", placeholder="Search by name or email...")
+    if search_q:
+        leads = filter_leads(leads, search_q)
+
+    components.html(
+        """
+    <script>
+    (function () {
+    const stop = Date.now() + 3000; // try for up to 3s
+    const timer = setInterval(() => {
+        const doc = window.parent.document;
+
+        // Find the input by its placeholder text
+        const el = Array.from(doc.querySelectorAll('input'))
+        .find(i => i.getAttribute('placeholder') === 'Search by name or email...');
+
+        if (el) {
+        el.setAttribute('autocomplete', 'off');
+        el.setAttribute('autocorrect', 'off');
+        el.setAttribute('autocapitalize', 'off');
+        el.setAttribute('spellcheck', 'false');
+
+        // IMPORTANT: change the name so Chrome won't reuse past entries
+        el.setAttribute('name', 'lead_search_' + Math.random().toString(36).slice(2));
+
+        clearInterval(timer);
+        }
+
+        if (Date.now() > stop) clearInterval(timer);
+    }, 100);
+    })();
+    </script>
+    """,
+        height=0,
+)
+
+# --- VIEWS ---
+
 if view_mode == "📥 Inbox (New Leads)":
     st.header("Inbox: New Leads")
-    st.caption("Candidates vetted by the Agent awaiting your approval.")
-
-    inbox = [
-        l
-        for l in leads
-        if getattr(l, "draft_message", None)
-        and getattr(l, "stage", None) in ["EXPRESSED_INTEREST", "POTENTIAL_FIT", "NO_FIT"]
-    ]
-    if not inbox:
-        st.success("Inbox Zero! Great job. 🧘")
-    for l in inbox:
-        render_lead_card(l)
+    targets = [l for l in leads if getattr(l, "draft_message", None) and l.stage in ["EXPRESSED_INTEREST", "POTENTIAL_FIT", "NO_FIT"]]
+    if not targets: st.success("Inbox Zero! Great job. 🧘")
+    for l in targets: render_lead_card(l)
 
 elif view_mode == "🔥 Hot Leads (Action Required)":
     st.header("Prioritized Call List")
-    st.caption("Rank 1 (Site Ready) & Rank 2 (Cash Ready) candidates.")
-
-    # Filter for active stages AND exclude Inbox stages to avoid duplicates if draft exists
-    hot = [l for l in leads if getattr(l, "stage", None) in ["READY_FOR_CALL", "FAQ_SENT", "INTEREST_CHECK_SENT"]]
-    hot.sort(key=lambda x: getattr(x, "priority_rank", 9999))
+    targets = get_leads_by_stage(["READY_FOR_CALL", "INTEREST_CHECK_SENT"])
+    targets.sort(key=lambda x: getattr(x, "priority_rank", 999))
+    if not targets: 
+        st.info("No hot leads pending calls or replies.")
+        st.caption("Check the 'Engagement' tab if you are looking for leads currently being screened.")
     
-    if not hot:
-        st.info("No hot leads pending calls.")
-    for l in hot:
+    for l in targets: 
         render_lead_card(l)
 
 elif view_mode == "🌤️ Warm Leads (Nurture)":
-    st.header("Warm Leads Nurture List")
-    st.caption("Candidates PARKED for future cohorts.")
-
-    warm = [l for l in leads if getattr(l, "stage", None) == "WARM_LEAD"]
-
-    if not warm:
-        st.info("No Warm Leads.")
-    else:
-        # FIXED: Switched from Dataframe to Card View
-        for l in warm:
-            render_lead_card(l)
+    st.header("Warm Leads")
+    targets = get_leads_by_stage(["WARM_LEAD"])
+    if not targets: st.info("No Warm Leads.")
+    for l in targets: render_lead_card(l)
 
 elif view_mode == "💬 Engagement (Screening)":
-    st.header("Engagement & Screening")
-    st.caption("Leads currently reviewing FAQs or timelines.")
-    engaged = [l for l in leads if getattr(l, "stage", None) in ["FAQ_SENT"]]
-    if not engaged:
-        st.info("No leads currently in engagement.")
-    for l in engaged:
-        render_lead_card(l)
+    st.header("Engagement")
+    targets = get_leads_by_stage(["FAQ_SENT"])
+    if not targets: st.info("No active engagement.")
+    for l in targets: render_lead_card(l)
 
 elif view_mode == "📂 Compliance (KYC/KYB)":
-    st.header("Compliance")
-    compliance = [l for l in leads if getattr(l, "stage", None) == "KYC_SCREENING"]
-    if not compliance:
-        st.info("No candidates in compliance stage.")
-    for l in compliance:
-        render_lead_card(l)
+    st.header("Compliance Checklist")
+    targets = get_leads_by_stage(["KYC_SCREENING"])
+    if not targets: st.info("No active compliance checks.")
+    for l in targets: render_lead_card(l)
+
+elif view_mode == "💰 Financial Assessment":
+    st.header("Financial Assessment")
+    targets = get_leads_by_stage(["FINANCIAL_ASSESSMENT"])
+    if not targets: st.info("No financial assessments pending.")
+    for l in targets: render_lead_card(l)
+
+elif view_mode == "🧠 Psychometric & Interview":
+    st.header("Psych & Interview")
+    targets = get_leads_by_stage(["ASSESSMENT_PSYCH", "ASSESSMENT_INTERVIEW"])
+    if not targets: st.info("No assessments pending.")
+    for l in targets: render_lead_card(l)
+
+elif view_mode == "📍 Site & Contract":
+    st.header("Site Vetting & Contracting")
+    targets = get_leads_by_stage(["SITE_SEARCH", "SITE_VETTING", "CONTRACTING"])
+    if not targets: st.info("No pending contracts.")
+    for l in targets: render_lead_card(l)
+
+elif view_mode == "✅ Contracted / Alumni":
+    st.header("Contracted Franchisees")
+    targets = get_leads_by_stage(["CONTRACT_CLOSED"])
+    if not targets: st.info("No contracted leads yet.")
+    for l in targets: render_lead_card(l)
 
 elif view_mode == "🔍 Master Database":
     st.header("Master Database")
@@ -638,7 +746,7 @@ elif view_mode == "🔍 Master Database":
             try:
                 event = st.dataframe(
                     df_table,
-                    use_container_width=True,
+                    width="stretch",
                     hide_index=True,
                     on_select="rerun",
                     selection_mode="single-row",
@@ -710,19 +818,33 @@ elif view_mode == "🔍 Master Database":
                     tabs = st.tabs(["Core", "Fit", "Contact", "KYC", "Metadata", "Raw JSON"])
 
                     with tabs[0]:
-                        st.dataframe(kv_df({k: record.get(k) for k in core_keys}), use_container_width=True, hide_index=True)
+                        st.dataframe(kv_df({k: record.get(k) for k in core_keys}), width="stretch", hide_index=True)
 
                     with tabs[1]:
-                        st.dataframe(kv_df({k: record.get(k) for k in fit_keys}), use_container_width=True, hide_index=True)
+                        st.dataframe(kv_df({k: record.get(k) for k in fit_keys}), width="stretch", hide_index=True)
 
                     with tabs[2]:
-                        st.dataframe(kv_df({k: record.get(k) for k in contact_keys}), use_container_width=True, hide_index=True)
+                        st.dataframe(kv_df({k: record.get(k) for k in contact_keys}), width="stretch", hide_index=True)
 
                     with tabs[3]:
-                        st.dataframe(kv_df({k: record.get(k) for k in kyc_keys}), use_container_width=True, hide_index=True)
+                        # NEW: Enhanced KYC View
+                        checklist = record.get("checklist_status", {})
+                        if checklist:
+                            st.subheader("Checklist Details")
+                            df_chk = pd.DataFrame({
+                                "Document": list(checklist.keys()),
+                                "Status": ["✅ Received" if v else "❌ Pending" for v in checklist.values()]
+                            })
+                            st.dataframe(df_chk, width='stretch', hide_index=True)
+                        else:
+                            st.info("No checklist active.")
+                        
+                        # Show non-checklist KYC fields below
+                        st.divider()
+                        st.dataframe(kv_df({k: record.get(k) for k in kyc_keys if k != "checklist_status"}), width='stretch', hide_index=True)
 
                     with tabs[4]:
-                        st.dataframe(kv_df({k: record.get(k) for k in meta_keys}), use_container_width=True, hide_index=True)
+                        st.dataframe(kv_df({k: record.get(k) for k in meta_keys}), width="stretch", hide_index=True)
 
                     with tabs[5]:
                         st.json(record)

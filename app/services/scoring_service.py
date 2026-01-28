@@ -19,7 +19,19 @@ class ScoringService:
         if lead.financial_readiness_input == gates["financial_status"]:
             return {"passed": False, "reason": "Lack of Capital (Hard No)"}
             
-        # 3. Clinic Conversion Checks (Only if facility_meta exists)
+        # 3. Location Validity (NEW STRICT GATE)
+        # Verify against territories.json
+        valid_counties = self.territories.get("valid_counties", [])
+        # Normalize input to Title Case to match list (e.g. "nairobi" -> "Nairobi")
+        user_county = str(lead.location_county_input).strip().title()
+        
+        if user_county not in valid_counties:
+            return {
+                "passed": False, 
+                "reason": f"Location '{user_county}' is outside operational areas"
+            }
+
+        # 4. Clinic Conversion Checks (Only if facility_meta exists)
         if lead.facility_meta.get("is_clinic_owner") == "Yes":
             conv_gates = gates["clinic_conversion_failures"]
             if lead.facility_meta.get("is_llc") == conv_gates["is_llc"]:
