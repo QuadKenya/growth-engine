@@ -131,10 +131,12 @@ class WorkflowService:
         """Start KYC/KYB."""
         lead = db.get_lead(lead_id)
         
-        # Determine List Type (Logic Simplified: Always KYC_Individual unless override)
-        # We removed the automatic 'KYB' fork logic based on Clinic Ownership
-        # to deprioritize KYB as requested.
-        list_key = type_override if type_override else "KYC_Individual"
+        # Determine List Type
+        if type_override:
+            list_key = type_override
+        else:
+            is_clinic = lead.facility_meta.get("is_clinic_owner") == "Yes"
+            list_key = "KYB_Clinic_Conversion" if is_clinic else "KYC_Individual"
         
         items = self.checklists.get(list_key, [])
         lead.checklist_type = list_key
@@ -166,7 +168,7 @@ class WorkflowService:
         else:
             # AUTO-TRANSITION: Move to Warm Leads immediately
             lead.stage = PipelineStage.WARM_LEAD
-            lead.rejection_type = "Soft"
+            lead.rejection_type= "Soft"
             lead.soft_rejection_reason = f"Insufficient Verified Capital (KES {amount})"
             # Set Nurture Timer (e.g., 3 Months to save up)
             lead.wake_up_date = (datetime.now() + timedelta(days=90)).strftime("%Y-%m-%d")
@@ -221,22 +223,6 @@ class WorkflowService:
         lead.draft_message = None
         if reason: lead.notes = reason
         self.log_activity(lead, f"Manually Rejected. Reason: {reason}", ActivityType.TRANSITION)
-        db.upsert_lead(lead)
-
-    def reactivate_lead(self, lead_id: str):
-        """Reactivates a Warm Lead back to Potential Fit."""
-        lead = db.get_lead(lead_id)
-        lead.stage = PipelineStage.POTENTIAL_FIT
-        lead.wake_up_date = None
-        lead.soft_rejection_reason = None
-        
-        # Regenerate Draft based on Priority (Rank 1 vs Standard)
-        if lead.priority_rank == 1:
-            lead.draft_message = drafter.generate_draft(lead, "invite_to_call_priority")
-        else:
-            lead.draft_message = drafter.generate_draft(lead, "interest_check")
-            
-        self.log_activity(lead, "Lead Reactivated from Warm Pool. Draft Regenerated.", ActivityType.TRANSITION)
         db.upsert_lead(lead)
 
     # NEW: Update draft helper (was missing from previous file dump but used in dashboard)

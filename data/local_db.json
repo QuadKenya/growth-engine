@@ -1,7 +1,7 @@
 [
   {
     "lead_id": "john.kamau@test.com",
-    "timestamp": "2026-01-27 21:31:51",
+    "timestamp": "2026-02-06 16:03:18",
     "email": "john.kamau@test.com",
     "first_name": "John",
     "middle_name": null,
@@ -35,14 +35,14 @@
     "notes": null,
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.609354",
+        "timestamp": "2026-02-07 18:03:18.334618",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.609443",
+        "timestamp": "2026-02-07 18:03:18.334695",
         "author": "System",
         "type": "TRANSITION",
         "content": "Vetting Passed. Rank 1 (Ideal Fit).",
@@ -54,7 +54,7 @@
   },
   {
     "lead_id": "sarah.hassan@test.com",
-    "timestamp": "2026-01-26 18:31:51",
+    "timestamp": "2026-02-05 13:03:18",
     "email": "sarah.hassan@test.com",
     "first_name": "Sarah",
     "middle_name": null,
@@ -88,14 +88,14 @@
     "notes": null,
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.610058",
+        "timestamp": "2026-02-07 18:03:18.335284",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.610102",
+        "timestamp": "2026-02-07 18:03:18.335324",
         "author": "System",
         "type": "TRANSITION",
         "content": "Vetting Passed. Rank 3 (Good Fit).",
@@ -107,7 +107,7 @@
   },
   {
     "lead_id": "peter.omondi@test.com",
-    "timestamp": "2026-01-25 22:31:51",
+    "timestamp": "2026-02-04 17:03:18",
     "email": "peter.omondi@test.com",
     "first_name": "Peter",
     "middle_name": null,
@@ -141,14 +141,14 @@
     "notes": null,
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.610667",
+        "timestamp": "2026-02-07 18:03:18.335751",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.610711",
+        "timestamp": "2026-02-07 18:03:18.335783",
         "author": "System",
         "type": "TRANSITION",
         "content": "Vetting Passed. Rank 1 (Fair/Conditional Fit).",
@@ -159,61 +159,8 @@
     "last_contact_channel": null
   },
   {
-    "lead_id": "david.lagat@test.com",
-    "timestamp": "2026-01-24 19:31:51",
-    "email": "david.lagat@test.com",
-    "first_name": "David",
-    "middle_name": null,
-    "last_name": "Lagat",
-    "phone": "254700000004",
-    "current_profession": "Shopkeeper",
-    "experience_years": "None",
-    "has_business_exp": "No",
-    "financial_readiness_input": "I need a loan",
-    "location_county_input": "Nairobi",
-    "location_status_input": "No",
-    "facility_meta": {},
-    "stage": "NO_FIT",
-    "fit_score": 0.0,
-    "fit_classification": "Unscored",
-    "priority_rank": 3,
-    "rejection_type": "Hard",
-    "wake_up_date": null,
-    "soft_rejection_reason": null,
-    "draft_message": "TO: david.lagat@test.com\nCHANNEL: WhatsApp (+254700000004)\n\nDear David,\nBased on our current criteria regarding No Business Experience, we cannot proceed with your application at this time.",
-    "preferred_call_time": null,
-    "checklist_status": {},
-    "checklist_type": "KYC_Individual",
-    "verified_financial_capital": null,
-    "psychometric_score": null,
-    "interview_notes": null,
-    "interview_date": null,
-    "site_visit_score": null,
-    "site_location_details": null,
-    "contract_generated_date": null,
-    "notes": "No Business Experience",
-    "activity_log": [
-      {
-        "timestamp": "2026-01-28 23:31:51.611192",
-        "author": "System",
-        "type": "SYSTEM",
-        "content": "Lead captured via Google Form.",
-        "stage_snapshot": "EXPRESSED_INTEREST"
-      },
-      {
-        "timestamp": "2026-01-28 23:31:51.611210",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "Hard Rejection: No Business Experience",
-        "stage_snapshot": "NO_FIT"
-      }
-    ],
-    "last_contact_date": null,
-    "last_contact_channel": null
-  },
-  {
     "lead_id": "alice.mutua@test.com",
-    "timestamp": "2026-01-23 21:31:51",
+    "timestamp": "2026-02-02 16:03:18",
     "email": "alice.mutua@test.com",
     "first_name": "Alice",
     "middle_name": null,
@@ -247,14 +194,14 @@
     "notes": null,
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.611743",
+        "timestamp": "2026-02-07 18:03:18.336705",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.611779",
+        "timestamp": "2026-02-07 18:03:18.336737",
         "author": "System",
         "type": "TRANSITION",
         "content": "Vetting Passed. Rank 2 (Good Fit).",
@@ -266,7 +213,7 @@
   },
   {
     "lead_id": "grace.soi@test.com",
-    "timestamp": "2026-01-22 17:31:51",
+    "timestamp": "2026-02-01 12:03:18",
     "email": "grace.soi@test.com",
     "first_name": "Grace",
     "middle_name": null,
@@ -300,14 +247,14 @@
     "notes": null,
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.612262",
+        "timestamp": "2026-02-07 18:03:18.337265",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.612291",
+        "timestamp": "2026-02-07 18:03:18.337293",
         "author": "System",
         "type": "TRANSITION",
         "content": "Vetting Passed. Rank 1 (Ideal Fit).",
@@ -319,7 +266,7 @@
   },
   {
     "lead_id": "brian.bosire@test.com",
-    "timestamp": "2026-01-21 20:31:51",
+    "timestamp": "2026-01-31 15:03:18",
     "email": "brian.bosire@test.com",
     "first_name": "Brian",
     "middle_name": null,
@@ -353,14 +300,14 @@
     "notes": "No Business Experience",
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.612780",
+        "timestamp": "2026-02-07 18:03:18.337850",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.612794",
+        "timestamp": "2026-02-07 18:03:18.337863",
         "author": "System",
         "type": "TRANSITION",
         "content": "Hard Rejection: No Business Experience",
@@ -372,7 +319,7 @@
   },
   {
     "lead_id": "faith.njeri@test.com",
-    "timestamp": "2026-01-20 22:31:51",
+    "timestamp": "2026-01-30 17:03:18",
     "email": "faith.njeri@test.com",
     "first_name": "Faith",
     "middle_name": null,
@@ -406,14 +353,14 @@
     "notes": "No Business Experience",
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.613334",
+        "timestamp": "2026-02-07 18:03:18.338622",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.613351",
+        "timestamp": "2026-02-07 18:03:18.338654",
         "author": "System",
         "type": "TRANSITION",
         "content": "Hard Rejection: No Business Experience",
@@ -425,7 +372,7 @@
   },
   {
     "lead_id": "kelvin.koinet@test.com",
-    "timestamp": "2026-01-19 18:31:51",
+    "timestamp": "2026-01-29 13:03:18",
     "email": "kelvin.koinet@test.com",
     "first_name": "Kelvin",
     "middle_name": null,
@@ -459,14 +406,14 @@
     "notes": "Location 'Machakos' is outside operational areas",
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.614035",
+        "timestamp": "2026-02-07 18:03:18.339387",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.614051",
+        "timestamp": "2026-02-07 18:03:18.339405",
         "author": "System",
         "type": "TRANSITION",
         "content": "Hard Rejection: Location 'Machakos' is outside operational areas",
@@ -478,7 +425,7 @@
   },
   {
     "lead_id": "miriam.kilonzo@test.com",
-    "timestamp": "2026-01-18 21:31:51",
+    "timestamp": "2026-01-28 16:03:18",
     "email": "miriam.kilonzo@test.com",
     "first_name": "Miriam",
     "middle_name": null,
@@ -512,14 +459,14 @@
     "notes": "Low Score (Non-Specific)",
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.614623",
+        "timestamp": "2026-02-07 18:03:18.340350",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.614662",
+        "timestamp": "2026-02-07 18:03:18.340414",
         "author": "System",
         "type": "TRANSITION",
         "content": "Low Score. Hard Rejection.",
@@ -531,7 +478,7 @@
   },
   {
     "lead_id": "daniel.kiptoo@test.com",
-    "timestamp": "2026-01-17 19:31:51",
+    "timestamp": "2026-01-27 14:03:18",
     "email": "daniel.kiptoo@test.com",
     "first_name": "Daniel",
     "middle_name": null,
@@ -549,7 +496,7 @@
     "fit_classification": "Not A Fit",
     "priority_rank": 3,
     "rejection_type": "Soft",
-    "wake_up_date": "2027-01-28",
+    "wake_up_date": "2027-02-07",
     "soft_rejection_reason": "experience",
     "draft_message": "TO: daniel.kiptoo@test.com\nCHANNEL: WhatsApp (+254700000011)\n\nDear Daniel,\nYour profile is promising! However, Curafa requires 3 years of clinical experience.\nWe have added you to our Talent Pool and will reach out in 12 months.",
     "preferred_call_time": null,
@@ -565,14 +512,14 @@
     "notes": null,
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.615284",
+        "timestamp": "2026-02-07 18:03:18.341470",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.615337",
+        "timestamp": "2026-02-07 18:03:18.341545",
         "author": "System",
         "type": "TRANSITION",
         "content": "Soft Rejection (experience). Moved to Warm Leads.",
@@ -584,7 +531,7 @@
   },
   {
     "lead_id": "ruth.keya@test.com",
-    "timestamp": "2026-01-16 21:31:51",
+    "timestamp": "2026-01-26 16:03:18",
     "email": "ruth.keya@test.com",
     "first_name": "Ruth",
     "middle_name": null,
@@ -618,14 +565,14 @@
     "notes": null,
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.615988",
+        "timestamp": "2026-02-07 18:03:18.342626",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.616017",
+        "timestamp": "2026-02-07 18:03:18.342669",
         "author": "System",
         "type": "TRANSITION",
         "content": "Vetting Passed. Rank 1 (Fair/Conditional Fit).",
@@ -637,7 +584,7 @@
   },
   {
     "lead_id": "hassan.abdi@test.com",
-    "timestamp": "2026-01-15 17:31:51",
+    "timestamp": "2026-01-25 12:03:18",
     "email": "hassan.abdi@test.com",
     "first_name": "Hassan",
     "middle_name": null,
@@ -671,14 +618,14 @@
     "notes": "No Business Experience",
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.616709",
+        "timestamp": "2026-02-07 18:03:18.343406",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.616724",
+        "timestamp": "2026-02-07 18:03:18.343422",
         "author": "System",
         "type": "TRANSITION",
         "content": "Hard Rejection: No Business Experience",
@@ -690,7 +637,7 @@
   },
   {
     "lead_id": "irene.mwangi@test.com",
-    "timestamp": "2026-01-14 22:31:51",
+    "timestamp": "2026-01-24 17:03:18",
     "email": "irene.mwangi@test.com",
     "first_name": "Irene",
     "middle_name": null,
@@ -708,7 +655,7 @@
     "fit_classification": "Not A Fit",
     "priority_rank": 3,
     "rejection_type": "Soft",
-    "wake_up_date": "2027-01-28",
+    "wake_up_date": "2027-02-07",
     "soft_rejection_reason": "experience",
     "draft_message": "TO: irene.mwangi@test.com\nCHANNEL: WhatsApp (+254700000014)\n\nDear Irene,\nYour profile is promising! However, Curafa requires 3 years of clinical experience.\nWe have added you to our Talent Pool and will reach out in 12 months.",
     "preferred_call_time": null,
@@ -724,14 +671,14 @@
     "notes": null,
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.617700",
+        "timestamp": "2026-02-07 18:03:18.344146",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.617775",
+        "timestamp": "2026-02-07 18:03:18.344193",
         "author": "System",
         "type": "TRANSITION",
         "content": "Soft Rejection (experience). Moved to Warm Leads.",
@@ -743,7 +690,7 @@
   },
   {
     "lead_id": "samuel.mule@test.com",
-    "timestamp": "2026-01-13 20:31:51",
+    "timestamp": "2026-01-23 15:03:18",
     "email": "samuel.mule@test.com",
     "first_name": "Samuel",
     "middle_name": null,
@@ -777,14 +724,14 @@
     "notes": "No Business Experience",
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.618692",
+        "timestamp": "2026-02-07 18:03:18.344947",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.618710",
+        "timestamp": "2026-02-07 18:03:18.344960",
         "author": "System",
         "type": "TRANSITION",
         "content": "Hard Rejection: No Business Experience",
@@ -796,7 +743,7 @@
   },
   {
     "lead_id": "agnes.maisha@test.com",
-    "timestamp": "2026-01-12 21:31:51",
+    "timestamp": "2026-01-22 16:03:18",
     "email": "agnes.maisha@test.com",
     "first_name": "Agnes",
     "middle_name": null,
@@ -830,14 +777,14 @@
     "notes": "No Business Experience",
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.619521",
+        "timestamp": "2026-02-07 18:03:18.345875",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.619536",
+        "timestamp": "2026-02-07 18:03:18.345888",
         "author": "System",
         "type": "TRANSITION",
         "content": "Hard Rejection: No Business Experience",
@@ -849,7 +796,7 @@
   },
   {
     "lead_id": "victor.gaati@test.com",
-    "timestamp": "2026-01-11 18:31:51",
+    "timestamp": "2026-01-21 13:03:18",
     "email": "victor.gaati@test.com",
     "first_name": "Victor",
     "middle_name": null,
@@ -883,14 +830,14 @@
     "notes": null,
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.620336",
+        "timestamp": "2026-02-07 18:03:18.346899",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.620370",
+        "timestamp": "2026-02-07 18:03:18.346928",
         "author": "System",
         "type": "TRANSITION",
         "content": "Vetting Passed. Rank 1 (Ideal Fit).",
@@ -902,7 +849,7 @@
   },
   {
     "lead_id": "winnie.neeris@test.com",
-    "timestamp": "2026-01-10 21:31:51",
+    "timestamp": "2026-01-20 16:03:18",
     "email": "winnie.neeris@test.com",
     "first_name": "Winnie",
     "middle_name": null,
@@ -936,14 +883,14 @@
     "notes": "No Business Experience",
     "activity_log": [
       {
-        "timestamp": "2026-01-28 23:31:51.621200",
+        "timestamp": "2026-02-07 18:03:18.347780",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-01-28 23:31:51.621214",
+        "timestamp": "2026-02-07 18:03:18.347793",
         "author": "System",
         "type": "TRANSITION",
         "content": "Hard Rejection: No Business Experience",
@@ -951,6 +898,80 @@
       }
     ],
     "last_contact_date": null,
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "david.lagat@test.com",
+    "timestamp": "2026-02-03 14:03:18",
+    "email": "david.lagat@test.com",
+    "first_name": "David",
+    "middle_name": null,
+    "last_name": "Lagat",
+    "phone": "254700000004",
+    "current_profession": "Shopkeeper",
+    "experience_years": "None",
+    "has_business_exp": "No",
+    "financial_readiness_input": "I need a loan",
+    "location_county_input": "Nairobi",
+    "location_status_input": "No",
+    "facility_meta": {},
+    "stage": "TURNED_DOWN",
+    "fit_score": 0.0,
+    "fit_classification": "Unscored",
+    "priority_rank": 3,
+    "rejection_type": "Hard",
+    "wake_up_date": null,
+    "soft_rejection_reason": null,
+    "draft_message": null,
+    "preferred_call_time": null,
+    "checklist_status": {},
+    "checklist_type": "KYC_Individual",
+    "verified_financial_capital": null,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": "No Business Experience",
+    "activity_log": [
+      {
+        "timestamp": "2026-02-07 18:03:18.336236",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-07 18:03:18.336252",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Hard Rejection: No Business Experience",
+        "stage_snapshot": "NO_FIT"
+      },
+      {
+        "timestamp": "2026-02-07 18:03:52.595769",
+        "author": "System",
+        "type": "EMAIL",
+        "content": "Message Approved & Sent.",
+        "stage_snapshot": "NO_FIT"
+      },
+      {
+        "timestamp": "2026-02-07 18:04:40.739979",
+        "author": "Associate",
+        "type": "ACTION",
+        "content": "Manual Override: 'stage' changed from 'NO_FIT' to 'WARM_LEAD'",
+        "stage_snapshot": "WARM_LEAD"
+      },
+      {
+        "timestamp": "2026-02-07 18:05:16.798877",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Manually Rejected. Reason: None",
+        "stage_snapshot": "TURNED_DOWN"
+      }
+    ],
+    "last_contact_date": "2026-02-07 18:03:52",
     "last_contact_channel": null
   }
 ]

@@ -151,7 +151,7 @@ def render_activity_feed(lead):
     logs = getattr(lead, "activity_log", []) or []
 
     # Input for new note
-    new_note_content = st.text_area("Note Content", key=f"note_content_{getattr(lead,'lead_id','')}", placeholder="Type note here", height=100)
+    new_note_content = st.text_input("Note Content", key=f"note_content_{getattr(lead,'lead_id','')}", placeholder="Type note here")
     add_button = st.button("Add Note", key=f"add_button_{getattr(lead,'lead_id','')}")
 
     if add_button and new_note_content:
@@ -165,7 +165,7 @@ def render_activity_feed(lead):
     if not logs:
         st.caption("No activity recorded.")
     else:
-        # Helper to safely get attributes
+        # Helper to safely get attributes from either dict or Pydantic object
         def get_log_val(obj, attr, default=None):
             if isinstance(obj, dict):
                 return obj.get(attr, default)
@@ -174,10 +174,12 @@ def render_activity_feed(lead):
         # Sort newest first
         logs = sorted(logs, key=lambda x: get_log_val(x, 'timestamp') or '', reverse=True)
         
+        # Use a container with a fixed height and scrolling
         with st.container(height=250):
             for log in logs:
                 ts_raw = get_log_val(log, 'timestamp')
                 try:
+                    # Format timestamp
                     if isinstance(ts_raw, str):
                         dt = datetime.fromisoformat(str(ts_raw).replace('Z', ''))
                     else:
@@ -272,7 +274,6 @@ def render_lead_card(lead):
                         time.sleep(0.5)
                         st.rerun()
 
-                # --- STAGE SPECIFIC ACTIONS ---
                 if stage == "INTEREST_CHECK_SENT":
                     st.warning("Waiting for Reply...")
                     b1, b2 = st.columns(2)
@@ -283,13 +284,14 @@ def render_lead_card(lead):
                         workflow.handle_interest_response(lead.lead_id, "MAYBE")
                         st.rerun()
 
+                # --- STAGE SPECIFIC ACTIONS ---
+                
                 # Gate 3: Call Ready
                 if stage == "READY_FOR_CALL":
                     st.success("Candidate is Ready for Intro Call")
                     if st.button("✅ Call Complete / Start KYC", key=f"kyc_{lead.lead_id}", width="stretch"):
                         workflow.initialize_checklist(lead.lead_id)
-                        # REMOVED BALLOONS HERE
-                        # st.toast("KYC Started!")
+                        st.balloons()
                         time.sleep(1)
                         st.rerun()
 
@@ -310,12 +312,13 @@ def render_lead_card(lead):
 
                         with st.popover(f"📝 Manage Checklist ({completed}/{total})", width='stretch'):
                             for item, status in items.items():
+                                c_chk, c_lbl = st.columns([0.1, 0.9])
                                 if st.checkbox(item, value=status, key=f"{lead.lead_id}_{item}") != status:
                                     workflow.update_checklist(lead.lead_id, item, not status)
                                     st.rerun()
                     else:
                         st.warning("No checklist initialized.")
-
+                
                 # Gate 4: Financials
                 if stage == "FINANCIAL_ASSESSMENT":
                     amt = st.number_input("Verified Liquid Capital (KES)", min_value=0, step=10000, key=f"fin_{lead.lead_id}")
@@ -352,52 +355,38 @@ def render_lead_card(lead):
                         workflow.finalize_site_vetting(lead.lead_id, score)
                         st.rerun()
 
-                # if stage == "CONTRACTING":
-                #     st.success("Contract Generated!")
-                #     if st.button("🎉 Close Contract", key=f"cc_{lead.lead_id}", width="stretch"):
-                #         workflow.close_contract(lead.lead_id)
-                #         # ADDED BALLOONS HERE
-                #         st.balloons()
-                #         st.toast("Lead Contracted!")
-                #         st.rerun()
-                
                 if stage == "CONTRACTING":
-                    # 1. Check if we should show the celebration from a previous click
-                    if st.session_state.get(f"show_balloons_{lead.lead_id}"):
-                        st.balloons()
-                        st.toast("Lead Contracted!")
-                        # Clear the flag so they don't loop forever
-                        st.session_state[f"show_balloons_{lead.lead_id}"] = False
-
                     st.success("Contract Generated!")
                     if st.button("🎉 Close Contract", key=f"cc_{lead.lead_id}", width="stretch"):
                         workflow.close_contract(lead.lead_id)
-                        
-                        # 2. Set the flag in session state instead of calling balloons directly
-                        st.session_state[f"show_balloons_{lead.lead_id}"] = True
+                        st.balloons()
                         st.rerun()
                 
                 if stage == "CONTRACT_CLOSED":
                     st.success("Franchisee Onboarded")
 
-                # --- WARM LEAD SPECIFIC ACTIONS (Reactivate / Reject) ---
+                # --- WARM LEAD SPECIFIC ACTIONS (Reactivate / Hard Reject) ---
                 if stage == "WARM_LEAD":
-                    st.divider()
+                    # Layout: Compact side-by-side buttons
                     c1, c2 = st.columns(2)
-                    if c1.button("♻️ Reactivate", key=f"react_{lead.lead_id}", use_container_width=True):
-                        # UPDATED: Use the workflow helper to regenerate draft and fix state
-                        workflow.reactivate_lead(lead.lead_id)
+                    if c1.button("♻️ Reactivate", key=f"react_{lead.lead_id}", width="stretch"):
+                        # Reset to Potential Fit (Rank Logic will keep them prioritized)
+                        lead.stage = "POTENTIAL_FIT" 
+                        lead.wake_up_date = None
+                        lead.soft_rejection_reason = None
+                        db.upsert_lead(lead)
                         st.toast("Lead Reactivated!")
                         time.sleep(0.5)
                         st.rerun()
                     
-                    if c2.button("❌ Reject", key=f"r_warm_{lead.lead_id}", use_container_width=True):
+                    if c2.button("❌ Reject", key=f"r_warm_{lead.lead_id}", width="stretch"):
                         workflow.hard_reject(lead.lead_id)
                         st.rerun()
 
                 # --- STANDARD ACTIONS (Move to Warm / Reject) ---
+                # Exclude Terminal stages AND Warm Leads (handled above)
                 elif stage not in ["TURNED_DOWN", "CONTRACT_CLOSED", "WARM_LEAD"]:
-                    st.divider()
+                    # Layout: Compact side-by-side buttons
                     c1, c2 = st.columns(2)
                     if c1.button("🌤️ Warm", key=f"w_{lead.lead_id}", width="stretch"):
                         workflow.move_to_warm(lead.lead_id)
