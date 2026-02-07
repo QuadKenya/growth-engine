@@ -54,6 +54,36 @@ class ActivityLogEntry(BaseModel):
     class Config:
         use_enum_values = True
 
+# --- NEW: Financial Logic Structures ---
+class FinancialAssessmentData(BaseModel):
+    # ABD Inputs (Statement Credits)
+    statement_rows: List[Dict[str, Any]] = [] # [{date, credit_amount, include_deposit}]
+    
+    # ABB Inputs: 6 months x 6 checkpoints
+    abb_grid: Dict[str, Dict[str, Optional[float]]] = {} # {"Month 1": {"5th": 100, ...}}
+
+class FinancialAssessmentResults(BaseModel):
+    # ABD Results
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    num_months: int = 0
+    sum_deposits: float = 0.0
+    abd: float = 0.0
+    
+    # ABB Results
+    checkpoint_averages: Dict[str, float] = {}
+    abb: float = 0.0
+    
+    # Capacity Results
+    total_revenue: float = 0.0
+    net_income_amount: float = 0.0
+    installment_capacity_amount: float = 0.0
+    
+    # Decisions
+    revenue_pass: bool = False
+    installment_pass: bool = False
+    overall_pass: bool = False
+
 class Lead(BaseModel):
     # --- Identity ---
     lead_id: str
@@ -93,6 +123,8 @@ class Lead(BaseModel):
     # --- Gate 4: Compliance & Financials ---
     checklist_status: Dict[str, bool] = {} 
     checklist_type: str = "KYC_Individual"
+    financial_data: FinancialAssessmentData = Field(default_factory=FinancialAssessmentData)
+    financial_results: Optional[FinancialAssessmentResults] = None
     verified_financial_capital: Optional[float] = None
     
     # --- Gate 5: Assessment ---

@@ -15,7 +15,6 @@ import streamlit.components.v1 as components
 from app.db.supabase import db
 from app.services.workflow_service import workflow
 
-
 # --- PAGE CONFIG ---
 st.set_page_config(
     page_title="Access Afya | Growth Engine",
@@ -190,10 +189,17 @@ def render_activity_feed(lead):
                 content = get_log_val(log, 'content', '')
                 icon = "🤖" if author == "System" else "👤"
                 
+                # st.markdown(f"""
+                # <div class="log-box">
+                #     <div class="log-meta">{icon} <b>{author}</b> • {ts_str}</div>
+                #     <div class="log-content">{content}</div>
+                # </div>
+                # """, unsafe_allow_html=True)
+
                 st.markdown(f"""
-                <div class="log-box">
-                    <div class="log-meta">{icon} <b>{author}</b> • {ts_str}</div>
-                    <div class="log-content">{content}</div>
+                <div style="border-bottom: 1px solid #f0f2f6; padding-bottom: 10px; margin-bottom: 10px;">
+                    <div style="font-size: 0.85rem; color: #6b7280;">{icon} <b>{author}</b> • {ts_str}</div>
+                    <div style="font-size: 1rem; padding-top: 4px;">{content}</div>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -316,7 +322,7 @@ def render_lead_card(lead):
                             st.success("All documents verified! Moving to Financials...")
 
                         # Checklist Manager (Popover)
-                        with st.popover(f"✅ Update Checklist ({completed}/{total})", use_container_width=True):
+                        with st.popover(f"✅ Update Checklist ({completed}/{total})", width='stretch'):
                             for item, status in items.items():
                                 is_checked = st.checkbox(item, value=status, key=f"{lead.lead_id}_{item}")
                                 if is_checked != status:
@@ -324,14 +330,124 @@ def render_lead_card(lead):
                                     st.rerun()
                     else:
                         st.warning("No checklist initialized.")
-
+                        
                 # Gate 4: Financials
                 if stage == "FINANCIAL_ASSESSMENT":
-                    amt = st.number_input("Verified Liquid Capital (KES)", min_value=0, step=10000, key=f"fin_{lead.lead_id}")
-                    if st.button("Submit Assessment", key=f"sub_fin_{lead.lead_id}"):
-                        workflow.submit_financial_assessment(lead.lead_id, amt)
+                    st.subheader("💰 ABD & ABB Calculator")
+                    st.info("Complete the Statement Credits and Periodic Balances below to compute capacity.")
+
+                    # --- Step 1: ABD (Average Bank Deposits) ---
+                    with st.popover("📊 Step 1: Statement Credits (ABD)", width='stretch'):
+                        st.caption("Enter credit rows. Only 'Included' deposits count towards revenue.")
+
+                        # Robust data initialization
+                        current_rows = getattr(lead.financial_data, "statement_rows", []) or []
+                        if not current_rows:
+                            # IMPORTANT: use a real date object, not a string (Streamlit DateColumn requires this)
+                            current_rows = [{"date": date.today(), "credit_amount": 0.0, "include_deposit": True}]
+
+                        # DataFrame conversion + dtype normalization for Streamlit
+                        initial_df = pd.DataFrame(current_rows)
+
+                        # Ensure required columns exist
+                        if "date" not in initial_df.columns:
+                            initial_df["date"] = date.today()
+                        if "credit_amount" not in initial_df.columns:
+                            initial_df["credit_amount"] = 0.0
+                        if "include_deposit" not in initial_df.columns:
+                            initial_df["include_deposit"] = True
+
+                        # Convert date strings -> datetime.date (required for DateColumn)
+                        initial_df["date"] = pd.to_datetime(initial_df["date"], errors="coerce").dt.date
+                        initial_df["date"] = initial_df["date"].fillna(date.today())
+
+                        # Normalize other dtypes (prevents weird editor type issues)
+                        initial_df["credit_amount"] = pd.to_numeric(initial_df["credit_amount"], errors="coerce").fillna(0.0)
+                        initial_df["include_deposit"] = initial_df["include_deposit"].fillna(True).astype(bool)
+
+                        edited_abd = st.data_editor(
+                            initial_df,
+                            num_rows="dynamic",
+                            column_config={
+                                "date": st.column_config.DateColumn("Date", required=True, format="YYYY-MM-DD"),
+                                "credit_amount": st.column_config.NumberColumn("Amount (KES)", min_value=0, format="%.2f"),
+                                "include_deposit": st.column_config.CheckboxColumn("Include?"),
+                            },
+                            key=f"abd_editor_final_{lead.lead_id}",
+                            width='stretch',
+                        )
+
+                    # --- Step 2: ABB (Average Bank Balances) ---
+                    with st.popover("🏦 Step 2: Periodic Balances (ABB)", width='stretch'):
+                        st.caption("Enter balances for the 5th, 10th, 15th, 20th, 25th, and 30th.")
+
+                        checkpoints = ["5th", "10th", "15th", "20th", "25th", "30th"]
+                        months = ["Month 1", "Month 2", "Month 3", "Month 4", "Month 5", "Month 6"]
+                        existing_grid = getattr(lead.financial_data, "abb_grid", {}) or {}
+
+                        new_abb_grid: dict[str, dict[str, float]] = {}
+                        for m in months:
+                            with st.expander(f"📅 {m}", expanded=(m == "Month 1")):
+                                cols = st.columns(3)
+                                new_abb_grid[m] = {}
+                                for i, cp in enumerate(checkpoints):
+                                    col_idx = i % 3
+                                    default_val = existing_grid.get(m, {}).get(cp)
+                                    val = cols[col_idx].number_input(
+                                        f"Day {cp}",
+                                        value=float(default_val) if default_val is not None else 0.0,
+                                        min_value=0.0,
+                                        key=f"abb_{m}_{cp}_{lead.lead_id}",
+                                    )
+                                    new_abb_grid[m][cp] = float(val)
+
+                    # --- Step 3: Action & Feedback ---
+                    if st.button(
+                        "🧮 Compute & Submit Assessment",
+                        key=f"sub_fin_{lead.lead_id}",
+                        width='stretch',
+                        type="primary",
+                    ):
+                        from app.models.domain import FinancialAssessmentData
+
+                        # Serialize rows: convert datetime.date/datetime -> ISO strings (stable for DB/JSON)
+                        rows = edited_abd.to_dict("records")
+                        for r in rows:
+                            d = r.get("date")
+                            if d is None:
+                                continue
+                            # datetime -> date
+                            if hasattr(d, "date"):
+                                try:
+                                    d = d.date()
+                                except Exception:
+                                    pass
+                            # date -> "YYYY-MM-DD"
+                            if hasattr(d, "isoformat"):
+                                r["date"] = d.isoformat()
+                            else:
+                                r["date"] = str(d)
+
+                            # Ensure expected fields exist and types are sane
+                            r["credit_amount"] = float(r.get("credit_amount") or 0.0)
+                            r["include_deposit"] = bool(r.get("include_deposit", True))
+
+                        # Payload preparation
+                        payload = FinancialAssessmentData(
+                            statement_rows=rows,
+                            abb_grid=new_abb_grid,
+                        )
+
+                        # Execution
+                        with st.spinner("Calculating capacity and updating lead status..."):
+                            workflow.submit_financial_assessment(lead.lead_id, payload)
+                            st.toast("✅ Assessment Calculated Successfully!", icon="💰")
+
+                        # Give the user a moment to see the toast before the UI refreshes
+                        time.sleep(1)
                         st.rerun()
 
+                
                 # Gate 5: Psych & Interview
                 if stage == "ASSESSMENT_PSYCH":
                     st.info("Psychometrics Link Sent.")
@@ -384,14 +500,14 @@ def render_lead_card(lead):
                 if stage == "WARM_LEAD":
                     st.divider()
                     c1, c2 = st.columns(2)
-                    if c1.button("♻️ Reactivate", key=f"react_{lead.lead_id}", use_container_width=True):
+                    if c1.button("♻️ Reactivate", key=f"react_{lead.lead_id}", width='stretch'):
                         # UPDATED: Use the workflow helper to regenerate draft and fix state
                         workflow.reactivate_lead(lead.lead_id)
                         st.toast("Lead Reactivated!")
                         time.sleep(0.5)
                         st.rerun()
                     
-                    if c2.button("❌ Reject", key=f"r_warm_{lead.lead_id}", use_container_width=True):
+                    if c2.button("❌ Reject", key=f"r_warm_{lead.lead_id}", width='stretch'):
                         workflow.hard_reject(lead.lead_id)
                         st.rerun()
 
@@ -421,7 +537,7 @@ with st.sidebar:
         "🔥 Hot Leads (Action Required)",
         "🌤️ Warm Leads (Nurture)",
         "💬 Engagement (Screening)",
-        "📂 Compliance (KYC/KYB)",
+        "📂 Compliance (KYC)",
         "💰 Financial Assessment",
         "🧠 Psychometric & Interview",
         "📍 Site & Contract",
@@ -488,8 +604,8 @@ def get_leads_by_stage(stages):
 m1, m2, m3, m4, m5 = st.columns(5)
 m1.metric("Total Pipeline", len(leads))
 m2.metric("📝 Pending Drafts", len([l for l in leads if getattr(l, "draft_message", None)]))
-m3.metric("📂 Comp. Pending", len(get_leads_by_stage(["KYC_SCREENING"]))) 
-m4.metric("🌤️ Warm", len(get_leads_by_stage(["WARM_LEAD"])))
+m3.metric("📂 KYC Screening", len(get_leads_by_stage(["KYC_SCREENING"]))) 
+m4.metric("🌤️ Warm/Nurture", len(get_leads_by_stage(["WARM_LEAD"])))
 m5.metric("🤝🏽 Contracted", len(get_leads_by_stage(["CONTRACT_CLOSED"])))
 
 st.divider()
@@ -563,7 +679,7 @@ elif view_mode == "💬 Engagement (Screening)":
     if not targets: st.info("No active engagement.")
     for l in targets: render_lead_card(l)
 
-elif view_mode == "📂 Compliance (KYC/KYB)":
+elif view_mode == "📂 Compliance (KYC)":
     st.header("Compliance Checklist")
     targets = get_leads_by_stage(["KYC_SCREENING"])
     if not targets: st.info("No active compliance checks.")

@@ -1,6 +1,7 @@
 from app.core.config import settings
-from app.models.domain import Lead
-from typing import Dict, Any
+from app.models.domain import Lead, FinancialAssessmentData, FinancialAssessmentResults
+from typing import Dict, Any, List, Optional
+from datetime import datetime
 
 class ScoringService:
     def __init__(self):
@@ -107,4 +108,74 @@ class ScoringService:
             if score >= t["min_score"]: return t["label"]
         return "Not A Fit"
 
+# --- NEW: Financial Assessment Logic ---
+class FinancialCalculator:
+    @staticmethod
+    def excel_datedif_m_plus_1(start_date: datetime, end_date: datetime) -> int:
+        """Replicates Excel's DATEDIF(start, end, 'm') + 1 logic."""
+        diff = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
+        if end_date.day < start_date.day:
+            diff -= 1
+        return diff + 1
+
+    @staticmethod
+    def excel_average(values: List[Optional[float]]) -> float:
+        """Replicates Excel AVERAGE (ignores blanks/None)."""
+        clean_values = [v for v in values if v is not None]
+        if not clean_values:
+            return 0.0
+        return sum(clean_values) / len(clean_values)
+
+    def calculate_assessment(self, data: FinancialAssessmentData) -> FinancialAssessmentResults:
+        res = FinancialAssessmentResults()
+        
+        # --- 1. ABD CALCULATIONS ---
+        if data.statement_rows:
+            # Parse dates safely
+            parsed_dates = []
+            for r in data.statement_rows:
+                d_str = r.get('date')
+                if d_str:
+                    try:
+                        parsed_dates.append(datetime.strptime(str(d_str), "%Y-%m-%d"))
+                    except: pass
+            
+            if parsed_dates:
+                res.start_date = min(parsed_dates).strftime("%Y-%m-%d")
+                res.end_date = max(parsed_dates).strftime("%Y-%m-%d")
+                res.num_months = self.excel_datedif_m_plus_1(min(parsed_dates), max(parsed_dates))
+                
+                # Sum credits where include is True
+                res.sum_deposits = sum(
+                    float(r.get('credit_amount', 0) or 0) 
+                    for r in data.statement_rows 
+                    if r.get('include_deposit') in [True, "Yes", "yes"]
+                )
+                res.abd = res.sum_deposits / res.num_months if res.num_months > 0 else 0
+        
+        # --- 2. ABB CALCULATIONS ---
+        checkpoints = ["5th", "10th", "15th", "20th", "25th", "30th"]
+        for cp in checkpoints:
+            cp_values = []
+            for m_key in data.abb_grid:
+                val = data.abb_grid[m_key].get(cp)
+                cp_values.append(val)
+            res.checkpoint_averages[cp] = self.excel_average(cp_values)
+        
+        # Overall ABB is average of the checkpoint averages
+        res.abb = self.excel_average(list(res.checkpoint_averages.values()))
+
+        # --- 3. CAPACITY & DECISIONS ---
+        res.total_revenue = res.abd 
+        res.net_income_amount = res.total_revenue * 0.5
+        res.installment_capacity_amount = res.net_income_amount * 0.5 # 0.25 of Total Revenue
+        
+        # Thresholds (Greater than 240k and 60k)
+        res.revenue_pass = res.total_revenue > 240000
+        res.installment_pass = res.installment_capacity_amount > 60000
+        res.overall_pass = res.revenue_pass and res.installment_pass
+        
+        return res
+
 scorer = ScoringService()
+fin_calc = FinancialCalculator()

@@ -3,8 +3,8 @@ import json
 import os
 from app.core.config import settings
 from app.db.supabase import db
-from app.models.domain import Lead, PipelineStage, ActivityLogEntry, ActivityType
-from app.services.scoring_service import scorer
+from app.models.domain import Lead, PipelineStage, ActivityLogEntry, ActivityType, FinancialAssessmentData
+from app.services.scoring_service import scorer, fin_calc
 from app.services.drafting_service import drafter
 
 class WorkflowService:
@@ -38,7 +38,7 @@ class WorkflowService:
         if not gate_check["passed"]:
             lead.stage = PipelineStage.NO_FIT
             lead.rejection_type = "Hard"
-            lead.notes = gate_check["reason"] # Legacy field
+            lead.notes = gate_check["reason"]
             lead.draft_message = drafter.generate_draft(lead, "hard_rejection")
             self.log_activity(lead, f"Hard Rejection: {gate_check['reason']}", ActivityType.TRANSITION)
             return db.upsert_lead(lead)
@@ -55,7 +55,6 @@ class WorkflowService:
                 lead.stage = PipelineStage.WARM_LEAD
                 lead.rejection_type = "Soft"
                 lead.soft_rejection_reason = soft_check["reason"]
-                
                 days = 365 if soft_check["reason"] == "experience" else 90
                 lead.wake_up_date = (datetime.now() + timedelta(days=days)).strftime("%Y-%m-%d")
                 lead.draft_message = drafter.generate_draft(lead, f"soft_rejection_{soft_check['reason']}")
@@ -78,7 +77,6 @@ class WorkflowService:
             lead.draft_message = drafter.generate_draft(lead, "invite_to_call_priority")
         else:
             lead.draft_message = drafter.generate_draft(lead, "interest_check")
-            
         return db.upsert_lead(lead)
 
     # --- GATE 2/3: ENGAGEMENT ---
@@ -98,7 +96,6 @@ class WorkflowService:
         
         lead.draft_message = None
         lead.last_contact_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
         self.log_activity(lead, "Message Approved & Sent.", ActivityType.EMAIL)
         db.upsert_lead(lead)
 
@@ -158,6 +155,33 @@ class WorkflowService:
                 lead.stage = PipelineStage.FINANCIAL_ASSESSMENT
                 lead.draft_message = None # Clear draft, no nudge needed
                 self.log_activity(lead, "All Docs Received. Moved to Financial Assessment.", ActivityType.TRANSITION)
+        db.upsert_lead(lead)
+
+    # --- UPDATED: Financial Submission ---
+    def submit_financial_assessment(self, lead_id: str, assessment_data: FinancialAssessmentData):
+        """Processes structured financial inputs and determines if lead proceeds."""
+        lead = db.get_lead(lead_id)
+        if not lead: return
+
+        # 1. Run Calculator
+        results = fin_calc.calculate_assessment(assessment_data)
+        
+        # 2. Persist inputs and results
+        lead.financial_data = assessment_data
+        lead.financial_results = results
+        lead.verified_financial_capital = results.total_revenue # Legacy display field
+        
+        # 3. Decision Logic
+        if results.overall_pass:
+            lead.stage = PipelineStage.ASSESSMENT_PSYCH
+            self.log_activity(lead, f"Financials PASSED. Revenue: KES {results.total_revenue:,.0f}, Capacity: KES {results.installment_capacity_amount:,.0f}", ActivityType.TRANSITION)
+        else:
+            lead.stage = PipelineStage.WARM_LEAD
+            lead.rejection_type = "Soft"
+            lead.soft_rejection_reason = f"Financial Threshold Not Met (Rev: KES {results.total_revenue:,.0f})"
+            lead.wake_up_date = (datetime.now() + timedelta(days=90)).strftime("%Y-%m-%d")
+            self.log_activity(lead, f"Financials FAILED (Rev: {results.total_revenue:,.0f} < 240k). Moved to Warm Leads.", ActivityType.TRANSITION)
+            
         db.upsert_lead(lead)
 
     # --- GATE 5: ASSESSMENT ---
