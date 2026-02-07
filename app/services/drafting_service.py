@@ -6,7 +6,7 @@ class DraftingService:
         self.system_prompt = settings.SYSTEM_PROMPT
 
     def generate_draft(self, lead: Lead, template_key: str) -> str:
-        # Mock Mode logic updated for new templates
+        # Header for context
         header = f"TO: {lead.email}\nCHANNEL: WhatsApp (+{lead.phone})\n\n"
         
         if template_key == "interest_check":
@@ -53,12 +53,23 @@ class DraftingService:
                 "If you agree, reply with your preferred time for an Intro Call."
             )
             
+        # --- NEW: Dynamic Compliance Nudge ---
         elif template_key == "checklist_reminder":
-            missing = [k for k, v in lead.checklist_status.items() if not v]
+            # Filter for False values in the checklist status
+            missing_docs = [k for k, v in lead.checklist_status.items() if not v]
+            
+            # Format the list
+            if not missing_docs:
+                doc_list = "(All documents received! No nudge needed.)"
+            else:
+                doc_list = "\n".join([f"- {doc}" for doc in missing_docs])
+
             return header + (
-                f"Hi {lead.first_name}, we are still waiting on:\n"
-                f"- {', '.join(missing)}\n"
-                "Please upload these to proceed to the Financial Assessment."
+                f"Habari {lead.first_name},\n\n"
+                "We are reviewing your compliance documents for the Curafa franchise.\n"
+                "We have received some items, but **we are still waiting for the following** to proceed to the Financial Assessment:\n\n"
+                f"{doc_list}\n\n"
+                "Please upload these at your earliest convenience so we can move to the next step."
             )
 
         elif template_key == "hard_rejection":

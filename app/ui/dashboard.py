@@ -276,10 +276,10 @@ def render_lead_card(lead):
                 if stage == "INTEREST_CHECK_SENT":
                     st.warning("Waiting for Reply...")
                     b1, b2 = st.columns(2)
-                    if b1.button("Replied YES", key=f"y_{lead.lead_id}", width='stretch'):
+                    if b1.button("✅ Replied YES", key=f"y_{lead.lead_id}", width='stretch'):
                         workflow.handle_interest_response(lead.lead_id, "YES")
                         st.rerun()
-                    if b2.button("Replied LATER", key=f"m_{lead.lead_id}", width='stretch'):
+                    if b2.button("⏳ Replied LATER", key=f"m_{lead.lead_id}", width='stretch'):
                         workflow.handle_interest_response(lead.lead_id, "MAYBE")
                         st.rerun()
 
@@ -301,17 +301,26 @@ def render_lead_card(lead):
                         completed = sum(1 for v in items.values() if v)
                         ratio = completed / total
                         missing_count = total - completed
-
+                        
                         st.progress(ratio, text=f"Progress: {int(ratio*100)}%")
-                        if missing_count > 0:
-                            st.caption(f"**{missing_count}** documents pending.")
+
+                        # Visual Reminder (Yellow Box)
+                        missing_items = [k for k, v in items.items() if not v]
+                        
+                        if missing_items:
+                            # Create a bulleted list string
+                            missing_str = "\n".join([f"- {item}" for item in missing_items])
+                            st.warning(f"**⚠️ Outstanding Documents ({len(missing_items)}):**\n\n{missing_str}")
+                            
                         else:
                             st.success("All documents verified! Moving to Financials...")
 
-                        with st.popover(f"📝 Manage Checklist ({completed}/{total})", width='stretch'):
+                        # Checklist Manager (Popover)
+                        with st.popover(f"✅ Update Checklist ({completed}/{total})", use_container_width=True):
                             for item, status in items.items():
-                                if st.checkbox(item, value=status, key=f"{lead.lead_id}_{item}") != status:
-                                    workflow.update_checklist(lead.lead_id, item, not status)
+                                is_checked = st.checkbox(item, value=status, key=f"{lead.lead_id}_{item}")
+                                if is_checked != status:
+                                    workflow.update_checklist(lead.lead_id, item, is_checked)
                                     st.rerun()
                     else:
                         st.warning("No checklist initialized.")
@@ -352,15 +361,6 @@ def render_lead_card(lead):
                         workflow.finalize_site_vetting(lead.lead_id, score)
                         st.rerun()
 
-                # if stage == "CONTRACTING":
-                #     st.success("Contract Generated!")
-                #     if st.button("🎉 Close Contract", key=f"cc_{lead.lead_id}", width="stretch"):
-                #         workflow.close_contract(lead.lead_id)
-                #         # ADDED BALLOONS HERE
-                #         st.balloons()
-                #         st.toast("Lead Contracted!")
-                #         st.rerun()
-                
                 if stage == "CONTRACTING":
                     # 1. Check if we should show the celebration from a previous click
                     if st.session_state.get(f"show_balloons_{lead.lead_id}"):
@@ -425,7 +425,7 @@ with st.sidebar:
         "💰 Financial Assessment",
         "🧠 Psychometric & Interview",
         "📍 Site & Contract",
-        "✅ Contracted / Alumni",
+        "🤝🏽 Contracted / Alumni",
         "🔍 Master Database"
     ],
     key="view_mode",
@@ -484,11 +484,13 @@ def get_leads_by_stage(stages):
     return [l for l in leads if getattr(l, "stage", "") in stages]
 
 # Metrics
-m1, m2, m3, m4 = st.columns(4)
+# UPDATED: Added Compliance Pending Metric
+m1, m2, m3, m4, m5 = st.columns(5)
 m1.metric("Total Pipeline", len(leads))
 m2.metric("📝 Pending Drafts", len([l for l in leads if getattr(l, "draft_message", None)]))
-m3.metric("🌤️ Warm / Nurture", len(get_leads_by_stage(["WARM_LEAD"])))
-m4.metric("✅ Contracted", len(get_leads_by_stage(["CONTRACT_CLOSED"])))
+m3.metric("📂 Comp. Pending", len(get_leads_by_stage(["KYC_SCREENING"]))) 
+m4.metric("🌤️ Warm", len(get_leads_by_stage(["WARM_LEAD"])))
+m5.metric("🤝🏽 Contracted", len(get_leads_by_stage(["CONTRACT_CLOSED"])))
 
 st.divider()
 

@@ -145,34 +145,19 @@ class WorkflowService:
         db.upsert_lead(lead)
 
     def update_checklist(self, lead_id: str, item: str, checked: bool):
+        """
+        Updates a specific checklist item.
+        Transitions to Financial Assessment if all items are complete.
+        """
         lead = db.get_lead(lead_id)
         if item in lead.checklist_status:
             lead.checklist_status[item] = checked
+            
             # Check if all done
             if all(lead.checklist_status.values()):
                 lead.stage = PipelineStage.FINANCIAL_ASSESSMENT
+                lead.draft_message = None # Clear draft, no nudge needed
                 self.log_activity(lead, "All Docs Received. Moved to Financial Assessment.", ActivityType.TRANSITION)
-        db.upsert_lead(lead)
-
-    def submit_financial_assessment(self, lead_id: str, amount: float):
-        """Gate 4 Decision."""
-        lead = db.get_lead(lead_id)
-        lead.verified_financial_capital = amount
-        
-        # Logic: 80k threshold
-        if amount >= 80000:
-            lead.stage = PipelineStage.ASSESSMENT_PSYCH
-            self.log_activity(lead, f"Financials Verified ({amount}). Moved to Psychometrics.", ActivityType.TRANSITION)
-        else:
-            # AUTO-TRANSITION: Move to Warm Leads immediately
-            lead.stage = PipelineStage.WARM_LEAD
-            lead.rejection_type = "Soft"
-            lead.soft_rejection_reason = f"Insufficient Verified Capital (KES {amount})"
-            # Set Nurture Timer (e.g., 3 Months to save up)
-            lead.wake_up_date = (datetime.now() + timedelta(days=90)).strftime("%Y-%m-%d")
-            
-            self.log_activity(lead, f"Financials Failed ({amount} < 80k). Moved to Warm Leads.", ActivityType.TRANSITION)
-            
         db.upsert_lead(lead)
 
     # --- GATE 5: ASSESSMENT ---
