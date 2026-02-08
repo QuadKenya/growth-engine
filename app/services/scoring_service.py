@@ -1,5 +1,5 @@
 from app.core.config import settings
-from app.models.domain import Lead, FinancialAssessmentData, FinancialAssessmentResults
+from app.models.domain import Lead, FinancialAssessmentData, FinancialAssessmentResults, SiteAssessmentData, SiteAssessmentResults
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
@@ -20,10 +20,8 @@ class ScoringService:
         if lead.financial_readiness_input == gates["financial_status"]:
             return {"passed": False, "reason": "Lack of Capital (Hard No)"}
             
-        # 3. Location Validity (NEW STRICT GATE)
-        # Verify against territories.json
+        # 3. Location Validity
         valid_counties = self.territories.get("valid_counties", [])
-        # Normalize input to Title Case to match list (e.g. "nairobi" -> "Nairobi")
         user_county = str(lead.location_county_input).strip().title()
         
         if user_county not in valid_counties:
@@ -32,14 +30,13 @@ class ScoringService:
                 "reason": f"Location '{user_county}' is outside operational areas"
             }
 
-        # 4. Clinic Conversion Checks (Only if facility_meta exists)
+        # 4. Clinic Conversion Checks
         if lead.facility_meta.get("is_clinic_owner") == "Yes":
             conv_gates = gates["clinic_conversion_failures"]
             if lead.facility_meta.get("is_llc") == conv_gates["is_llc"]:
                 return {"passed": False, "reason": "Clinic not LLC"}
             if lead.facility_meta.get("kmpdc_reg") == conv_gates["kmpdc"]:
                 return {"passed": False, "reason": "Clinic not KMPDC Registered"}
-            # Add other conversion checks as needed
         
         return {"passed": True, "reason": None}
 
@@ -55,7 +52,6 @@ class ScoringService:
         # Using simple string matching from config
         if prio_config["rank_2_criteria"]["financial_status"] in lead.financial_readiness_input:
             return 2
-            
         return 3
 
     def is_soft_rejection(self, lead: Lead) -> Dict[str, Any]:
@@ -85,22 +81,17 @@ class ScoringService:
         for criterion in model:
             input_val = lead_data.get(criterion["input_field"])
             points = 0.0
-            
             if "mapping" in criterion:
                 mapping = criterion["mapping"]
                 points = mapping.get(input_val, mapping.get("_default", 0.0))
-                
             elif criterion.get("logic_type") == "territory_match":
                 clean_loc = str(input_val).title()
                 if clean_loc in self.territories.get("location_map", {}) or \
                    clean_loc in self.territories.get("valid_counties", []):
                     points = 1.0
-                    
             elif criterion.get("logic_type") == "pass_through":
                 points = criterion.get("default_value", 1.0)
-                
             total_score += (points * criterion["weight"])
-
         return {"score": round(total_score, 4)}
 
     def classify_score(self, score: float) -> str:
@@ -122,8 +113,7 @@ class FinancialCalculator:
     def excel_average(values: List[Optional[float]]) -> float:
         """Replicates Excel AVERAGE (ignores blanks/None)."""
         clean_values = [v for v in values if v is not None]
-        if not clean_values:
-            return 0.0
+        if not clean_values: return 0.0
         return sum(clean_values) / len(clean_values)
 
     def calculate_assessment(self, data: FinancialAssessmentData) -> FinancialAssessmentResults:
@@ -136,10 +126,8 @@ class FinancialCalculator:
             for r in data.statement_rows:
                 d_str = r.get('date')
                 if d_str:
-                    try:
-                        parsed_dates.append(datetime.strptime(str(d_str), "%Y-%m-%d"))
+                    try: parsed_dates.append(datetime.strptime(str(d_str), "%Y-%m-%d"))
                     except: pass
-            
             if parsed_dates:
                 res.start_date = min(parsed_dates).strftime("%Y-%m-%d")
                 res.end_date = max(parsed_dates).strftime("%Y-%m-%d")
@@ -174,8 +162,77 @@ class FinancialCalculator:
         res.revenue_pass = res.total_revenue > 240000
         res.installment_pass = res.installment_capacity_amount > 60000
         res.overall_pass = res.revenue_pass and res.installment_pass
+        return res
+
+# --- NEW: Site Vetting Logic ---
+class SiteCalculator:
+    def __init__(self):
+        self.config = settings.RULES_CONFIG.get("site_vetting_logic", {})
+
+    def calculate_site_results(self, data: SiteAssessmentData) -> SiteAssessmentResults:
+        res = SiteAssessmentResults()
+        
+        # 1. Competition Logic (R/A/G)
+        matrix = self.config.get("competition_matrix", {}).get(data.setting_type, {})
+        clinic_count = data.competition_clinics_1km
+        
+        if clinic_count < matrix.get("Green", 3):
+            res.competition_status = "Green"
+            comp_score = 1.0
+        elif clinic_count == matrix.get("Amber", 4):
+            res.competition_status = "Amber"
+            comp_score = 0.5
+        else:
+            res.competition_status = "Red"
+            comp_score = 0.0
+
+        # 2. Foot Traffic Pass/Fail
+        min_traffic = self.config.get("foot_traffic_min", {}).get(data.setting_type, 350)
+        res.foot_traffic_pass = data.foot_traffic_count > min_traffic
+        traffic_score = 1.0 if res.foot_traffic_pass else 0.0
+
+        # 3. Physical Criteria
+        phys_mins = self.config.get("physical_minimums", {})
+        size_pass = data.building_sqft >= phys_mins.get("sqft", 600)
+        rooms_pass = data.has_2_rooms
+        ventilation_pass = data.ventilated_well_lit
+        accessibility_pass = data.mobile_accessible
+        
+        res.physical_criteria_pass = all([size_pass, rooms_pass, ventilation_pass, accessibility_pass])
+        physical_score = (sum([size_pass, rooms_pass, ventilation_pass, accessibility_pass]) / 4.0)
+
+        # 4. Utilities
+        res.utilities_pass = all([
+            data.electricity_available, 
+            data.water_available, 
+            data.internet_possible, 
+            data.private_toilets
+        ])
+        utilities_score = (sum([
+            data.electricity_available, 
+            data.water_available, 
+            data.internet_possible, 
+            data.private_toilets
+        ]) / 4.0)
+
+        # 5. Archetype Score
+        arch_map = self.config.get("archetype_weights", {})
+        archetype_val = arch_map.get(str(data.archetype_score), 0.25)
+
+        # 6. Cumulative Percentage
+        # (Comp + Traffic + Phys + Utils + Arch) / 5
+        res.overall_site_score = (comp_score + traffic_score + physical_score + utilities_score + archetype_val) / 5.0
+        
+        # Pass Condition: No Red Competition AND Traffic Pass AND Score > Threshold
+        threshold = self.config.get("pass_threshold_percent", 0.70)
+        res.overall_site_pass = (
+            res.competition_status != "Red" and 
+            res.foot_traffic_pass and 
+            res.overall_site_score >= threshold
+        )
         
         return res
 
 scorer = ScoringService()
 fin_calc = FinancialCalculator()
+site_calc = SiteCalculator()

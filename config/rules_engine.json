@@ -1,6 +1,6 @@
 {
-  "version": "2025.3",
-  "description": "Full Logic: Hard Gates, Prioritization, and Scoring",
+  "version": "2025.4",
+  "description": "Full Logic: Hard Gates, Scoring, and Site Vetting Rubric",
   
   "hard_gates": {
     "biz_exp": "No",
@@ -88,6 +88,30 @@
       { "label": "Fair/Conditional Fit", "min_score": 0.17 },
       { "label": "Not A Fit", "min_score": 0.00 }
     ]
+  },
+
+  "site_vetting_logic": {
+    "competition_matrix": {
+      "Urban": { "Green": 3, "Amber": 4, "Red": 5 },
+      "Semi-Urban": { "Green": 2, "Amber": 3, "Red": 4 },
+      "Rural": { "Green": 1, "Amber": 2, "Red": 3 }
+    },
+    "foot_traffic_min": {
+      "Urban": 600,
+      "Semi-Urban": 350,
+      "Rural": 350
+    },
+    "physical_minimums": {
+      "sqft": 600,
+      "min_rooms": 2
+    },
+    "archetype_weights": {
+      "1": 0.25,
+      "2": 0.50,
+      "3": 0.75,
+      "4": 1.0
+    },
+    "pass_threshold_percent": 0.70
   },
 
   "readiness_maps": {

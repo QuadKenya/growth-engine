@@ -3,8 +3,11 @@ import json
 import os
 from app.core.config import settings
 from app.db.supabase import db
-from app.models.domain import Lead, PipelineStage, ActivityLogEntry, ActivityType, FinancialAssessmentData
-from app.services.scoring_service import scorer, fin_calc
+from app.models.domain import (
+    Lead, PipelineStage, ActivityLogEntry, ActivityType, 
+    FinancialAssessmentData, SiteAssessmentData
+)
+from app.services.scoring_service import scorer, fin_calc, site_calc
 from app.services.drafting_service import drafter
 
 class WorkflowService:
@@ -93,7 +96,6 @@ class WorkflowService:
              lead.stage = PipelineStage.INTEREST_CHECK_SENT
         elif lead.stage == PipelineStage.FAQ_SENT:
              lead.stage = PipelineStage.READY_FOR_CALL
-        
         lead.draft_message = None
         lead.last_contact_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.log_activity(lead, "Message Approved & Sent.", ActivityType.EMAIL)
@@ -118,7 +120,6 @@ class WorkflowService:
     def add_note(self, lead_id: str, content: str):
         """Manual note by Associate."""
         lead = db.get_lead(lead_id)
-        # We append to activity log, but also update legacy 'notes' field for quick view
         lead.notes = content 
         self.log_activity(lead, content, ActivityType.NOTE, author="Associate")
         db.upsert_lead(lead)
@@ -127,17 +128,11 @@ class WorkflowService:
     def initialize_checklist(self, lead_id: str, type_override: str = None):
         """Start KYC/KYB."""
         lead = db.get_lead(lead_id)
-        
-        # Determine List Type (Logic Simplified: Always KYC_Individual unless override)
-        # We removed the automatic 'KYB' fork logic based on Clinic Ownership
-        # to deprioritize KYB as requested.
         list_key = type_override if type_override else "KYC_Individual"
-        
         items = self.checklists.get(list_key, [])
         lead.checklist_type = list_key
         lead.checklist_status = {item: False for item in items}
         lead.stage = PipelineStage.KYC_SCREENING
-        
         self.log_activity(lead, f"Started Compliance ({list_key}).", ActivityType.TRANSITION)
         db.upsert_lead(lead)
 
@@ -188,7 +183,6 @@ class WorkflowService:
     def log_interview_result(self, lead_id: str, result: str, notes: str):
         lead = db.get_lead(lead_id)
         lead.interview_notes = notes
-        
         if result == "PASS":
             lead.stage = PipelineStage.SITE_SEARCH
             self.log_activity(lead, "Interview Passed. Moved to Site Search.", ActivityType.TRANSITION)
@@ -197,16 +191,62 @@ class WorkflowService:
             self.log_activity(lead, "Interview Failed. Turned Down.", ActivityType.TRANSITION)
         db.upsert_lead(lead)
 
-    # --- GATE 6: SITE & CONTRACT ---
-    def finalize_site_vetting(self, lead_id: str, score: float):
+    # --- NEW: GATE 6: SITE SELECTION ---
+    def start_site_review(self, lead_id: str):
+        """Moves lead to Pre-Visit Desktop Review."""
         lead = db.get_lead(lead_id)
-        lead.site_visit_score = score
-        if score >= 80: # Passing score
+        lead.stage = PipelineStage.SITE_PRE_VISIT
+        self.log_activity(lead, "Site Information received. Starting Desktop Review.", ActivityType.TRANSITION)
+        db.upsert_lead(lead)
+
+    def update_pre_visit_checklist(self, lead_id: str, item: str, checked: bool):
+        """Updates Desktop Screening items."""
+        lead = db.get_lead(lead_id)
+        if item in lead.site_assessment_data.pre_visit_checklist:
+            lead.site_assessment_data.pre_visit_checklist[item] = checked
+            
+            # If all screening items are checked, move to POST_VISIT (Field Scorecard stage)
+            if all(lead.site_assessment_data.pre_visit_checklist.values()):
+                lead.stage = PipelineStage.SITE_POST_VISIT
+                self.log_activity(lead, "Desktop Review Complete. Moved to Field Assessment.", ActivityType.TRANSITION)
+        
+        db.upsert_lead(lead)
+
+    def submit_site_scorecard(self, lead_id: str, scorecard_data: SiteAssessmentData):
+        """Calculates site results and decides if lead moves to contracting."""
+        lead = db.get_lead(lead_id)
+        if not lead: return
+
+        # 1. Calculate
+        results = site_calc.calculate_site_results(scorecard_data)
+        
+        # 2. Persist
+        lead.site_assessment_data = scorecard_data
+        lead.site_assessment_results = results
+        lead.site_visit_score = results.overall_site_score * 100 
+        
+        # 3. Decision & Detailed Logging
+        if results.overall_site_pass:
             lead.stage = PipelineStage.CONTRACTING
             lead.contract_generated_date = datetime.now().strftime("%Y-%m-%d")
-            self.log_activity(lead, f"Site Approved (Score {score}). Contract Generated.", ActivityType.TRANSITION)
+            self.log_activity(lead, f"Site APPROVED (Score: {results.overall_site_score*100:.0f}%). Moving to Contracting.", ActivityType.TRANSITION)
         else:
-            self.log_activity(lead, f"Site Rejected (Score {score}). Search continues.", ActivityType.ACTION)
+            # Construct detailed reason string for the log
+            reasons = []
+            if results.competition_status == "Red": reasons.append("Competition: RED")
+            if not results.foot_traffic_pass: reasons.append("Foot Traffic: FAIL")
+            if not results.physical_criteria_pass: reasons.append("Physical Criteria: FAIL")
+            if not results.utilities_pass: reasons.append("Utilities: FAIL")
+            if results.overall_site_score < 0.70: reasons.append("Score below 70%")
+            
+            reason_str = ", ".join(reasons)
+            lead.stage = PipelineStage.SITE_SEARCH
+            self.log_activity(
+                lead, 
+                f"Site REJECTED (Score: {results.overall_site_score*100:.0f}%). Reasons: {reason_str}. Returning to search.", 
+                ActivityType.TRANSITION
+            )
+            
         db.upsert_lead(lead)
 
     def close_contract(self, lead_id: str):

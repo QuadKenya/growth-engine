@@ -188,13 +188,6 @@ def render_activity_feed(lead):
                 author = get_log_val(log, 'author', 'System')
                 content = get_log_val(log, 'content', '')
                 icon = "🤖" if author == "System" else "👤"
-                
-                # st.markdown(f"""
-                # <div class="log-box">
-                #     <div class="log-meta">{icon} <b>{author}</b> • {ts_str}</div>
-                #     <div class="log-content">{content}</div>
-                # </div>
-                # """, unsafe_allow_html=True)
 
                 st.markdown(f"""
                 <div style="border-bottom: 1px solid #f0f2f6; padding-bottom: 10px; margin-bottom: 10px;">
@@ -220,7 +213,7 @@ def render_lead_card(lead):
     elif stage == "KYC_SCREENING":
         css_class += " compliance"
         badge_html = '<span class="status-badge status-success">📂 Compliance</span>'
-    elif stage in ["FINANCIAL_ASSESSMENT", "ASSESSMENT_PSYCH", "SITE_SEARCH"]:
+    elif stage in ["FINANCIAL_ASSESSMENT", "ASSESSMENT_PSYCH", "SITE_SEARCH", "SITE_PRE_VISIT", "SITE_POST_VISIT"]:
         css_class += " late-stage"
         badge_html = f'<span class="status-badge status-purple">{stage}</span>'
     elif stage == "CONTRACT_CLOSED":
@@ -262,8 +255,14 @@ def render_lead_card(lead):
                      st.write(f"**Wake Up:** {_safe_str(getattr(lead, 'wake_up_date', ''))}")
 
                 if getattr(lead, "verified_financial_capital", None):
-                    st.success(f"**Verified Cap:** KES {getattr(lead, 'verified_financial_capital')}")
-                st.caption(f"Applied: {_safe_str(getattr(lead, 'timestamp', ''))}")
+                    st.success(f"**Verified Revenue:** KES {getattr(lead, 'verified_financial_capital'):,.0f}")
+                
+                if getattr(lead, "site_assessment_results", None):
+                    res = lead.site_assessment_results
+                    st.info(f"**Site Score:** {res.overall_site_score*100:.0f}%")
+                    st.write(f"**Competition:** {res.competition_status}")
+
+                st.caption(f"Applied: {getattr(lead, 'timestamp')}")
 
             with col_action:
                 st.caption("ACTIONS")
@@ -294,8 +293,6 @@ def render_lead_card(lead):
                     st.success("Candidate is Ready for Intro Call")
                     if st.button("✅ Call Complete / Start KYC", key=f"kyc_{lead.lead_id}", width="stretch"):
                         workflow.initialize_checklist(lead.lead_id)
-                        # REMOVED BALLOONS HERE
-                        # st.toast("KYC Started!")
                         time.sleep(1)
                         st.rerun()
 
@@ -341,7 +338,7 @@ def render_lead_card(lead):
                         st.caption("Enter credit rows. Only 'Included' deposits count towards revenue.")
 
                         # Robust data initialization
-                        current_rows = getattr(lead.financial_data, "statement_rows", []) or []
+                        current_rows = getattr(lead.financial_data, "statement_rows", None) or []
                         if not current_rows:
                             # IMPORTANT: use a real date object, not a string (Streamlit DateColumn requires this)
                             current_rows = [{"date": date.today(), "credit_amount": 0.0, "include_deposit": True}]
@@ -362,7 +359,7 @@ def render_lead_card(lead):
                         initial_df["date"] = initial_df["date"].fillna(date.today())
 
                         # Normalize other dtypes (prevents weird editor type issues)
-                        initial_df["credit_amount"] = pd.to_numeric(initial_df["credit_amount"], errors="coerce").fillna(0.0)
+                        initial_df["credit_amount"] = pd.to_numeric(initial_df["credit_amount"], errors="coerce").fillna(0.0).astype("float64")
                         initial_df["include_deposit"] = initial_df["include_deposit"].fillna(True).astype(bool)
 
                         edited_abd = st.data_editor(
@@ -447,7 +444,6 @@ def render_lead_card(lead):
                         time.sleep(1)
                         st.rerun()
 
-                
                 # Gate 5: Psych & Interview
                 if stage == "ASSESSMENT_PSYCH":
                     st.info("Psychometrics Link Sent.")
@@ -458,45 +454,103 @@ def render_lead_card(lead):
                 
                 if stage == "ASSESSMENT_INTERVIEW":
                     res = st.radio("Interview Result", ["PASS", "FAIL"], key=f"int_res_{lead.lead_id}")
-                    note = st.text_input("Interview Notes", key=f"int_note_{lead.lead_id}")
+                    note = st.text_area("Interview Notes", key=f"int_note_{lead.lead_id}", placeholder="Type note here", height=100)
                     if st.button("Log Result", key=f"log_int_{lead.lead_id}"):
                         workflow.log_interview_result(lead.lead_id, res, note)
                         st.rerun()
 
                 # Gate 6: Site & Contract
                 if stage == "SITE_SEARCH":
-                    st.info("Candidate searching for site...")
-                    if st.button("Site Found / Vetting Req", key=f"sf_{lead.lead_id}"):
-                        lead.stage = "SITE_VETTING"
-                        db.upsert_lead(lead)
+                    st.info("Lead is currently scouting for a location.")
+                    if st.button("🔍 Start Site Review", key=f"start_rev_{lead.lead_id}", width='stretch'):
+                        workflow.start_site_review(lead.lead_id)
                         st.rerun()
-                
-                if stage == "SITE_VETTING":
-                    score = st.slider("Site Score", 0, 100, 70, key=f"ss_{lead.lead_id}")
-                    if st.button("Finalize Site", key=f"fs_{lead.lead_id}"):
-                        workflow.finalize_site_vetting(lead.lead_id, score)
-                        st.rerun()
+
+                if stage == "SITE_PRE_VISIT":
+                    st.subheader("🖥️ Desktop Screening")
+                    checklist = lead.site_assessment_data.pre_visit_checklist
+                    missing = [k for k, v in checklist.items() if not v]
+                    
+                    if missing:
+                        st.warning(f"**⚠️ Outstanding Information:**\n" + "\n".join([f"- {i.replace('_',' ').title()}" for i in missing]))
+                    
+                    with st.popover("📝 Update Pre-Visit Items", width='stretch'):
+                        for item, status in checklist.items():
+                            if st.checkbox(item.replace('_',' ').title(), value=status, key=f"pre_{lead.lead_id}_{item}") != status:
+                                workflow.update_pre_visit_checklist(lead.lead_id, item, not status)
+                                st.rerun()
+
+                if stage == "SITE_POST_VISIT":
+                    st.subheader("📍 Field Scorecard")
+                    st.info("Input findings from the physical site visit.")
+                    
+                    with st.form(f"scorecard_{lead.lead_id}"):
+                        c1, c2 = st.columns(2)
+                        setting = c1.selectbox("Cluster Type", ["Urban", "Semi-Urban", "Rural"])
+                        archetype = c2.selectbox("Site Archetype", [1, 2, 3, 4], format_func=lambda x: {1:"1: Bad", 2:"2: Fair", 3:"3: Good", 4:"4: Excellent"}[x])
+                        
+                        st.divider()
+                        st.write("**Competition & Market**")
+                        cc1, cc2, cc3 = st.columns(3)
+                        clinics = cc1.number_input("Private Clinics (1km)", min_value=0)
+                        pharms = cc2.number_input("Pharmacies (1km)", min_value=0)
+                        traffic = cc3.number_input("Foot Traffic (Hourly)", min_value=0)
+                        
+                        st.divider()
+                        st.write("**Physical Condition**")
+                        cp1, cp2 = st.columns(2)
+                        sqft = cp1.number_input("Building Size (sqft)", min_value=0)
+                        rooms = cp2.checkbox("At least 2 rooms?")
+                        vent = st.checkbox("Ventilated and well-lit?")
+                        mobile = st.checkbox("Mobility Accessible?")
+                        
+                        st.divider()
+                        st.write("**Utilities**")
+                        cu1, cu2, cu3, cu4 = st.columns(4)
+                        elec = cu1.checkbox("Electricity")
+                        water = cu2.checkbox("Water")
+                        net = cu3.checkbox("Internet")
+                        toilet = cu4.checkbox("Private Toilets")
+
+                        if st.form_submit_button("🧮 Submit Site Scorecard", width='stretch'):
+                            from app.models.domain import SiteAssessmentData
+                            data = SiteAssessmentData(
+                                setting_type=setting, archetype_score=archetype,
+                                competition_clinics_1km=clinics, competition_pharmacies_1km=pharms,
+                                foot_traffic_count=traffic, building_sqft=sqft,
+                                has_2_rooms=rooms, ventilated_well_lit=vent, mobile_accessible=mobile,
+                                electricity_available=elec, water_available=water,
+                                internet_possible=net, private_toilets=toilet
+                            )
+                            workflow.submit_site_scorecard(lead.lead_id, data)
+                            st.rerun()
+
+                # if stage == "CONTRACTING":
+                #     st.success("🎉 Site Approved! Contract has been generated.")
+                #     if st.button("🚀 Finalize Onboarding", key=f"cc_{lead.lead_id}", width='stretch'):
+                #         workflow.close_contract(lead.lead_id); st.balloons(); st.rerun()
+
+                # Fire celebration on next rerun EVEN IF stage has already advanced
+                celebration_key = f"onboard_success_{lead.lead_id}"
+                if st.session_state.get(celebration_key):
+                    st.balloons()
+                    st.toast("🎉 Lead Successfully Contracted!", icon="🤝🏽")
+                    st.session_state[celebration_key] = False
 
                 if stage == "CONTRACTING":
-                    # 1. Check if we should show the celebration from a previous click
-                    if st.session_state.get(f"show_balloons_{lead.lead_id}"):
-                        st.balloons()
-                        st.toast("Lead Contracted!")
-                        # Clear the flag so they don't loop forever
-                        st.session_state[f"show_balloons_{lead.lead_id}"] = False
-
-                    st.success("Contract Generated!")
-                    if st.button("🎉 Close Contract", key=f"cc_{lead.lead_id}", width="stretch"):
+                    st.success("🎉 Site Approved! Contract has been generated.")
+                    if st.button("🚀 Finalize Onboarding", key=f"cc_{lead.lead_id}", width='stretch'):
                         workflow.close_contract(lead.lead_id)
-                        
-                        # 2. Set the flag in session state instead of calling balloons directly
-                        st.session_state[f"show_balloons_{lead.lead_id}"] = True
-                        st.rerun()
-                
-                if stage == "CONTRACT_CLOSED":
-                    st.success("Franchisee Onboarded")
 
-                # --- WARM LEAD SPECIFIC ACTIONS (Reactivate / Reject) ---
+                        # Set the flag so balloons fire on the next rerun
+                        st.session_state[celebration_key] = True
+                        st.rerun()
+
+                elif stage == "CONTRACT_CLOSED":
+                    st.success("Franchisee Onboarded ✅")
+
+                
+		# --- WARM LEAD SPECIFIC ACTIONS (Reactivate / Reject) ---
                 if stage == "WARM_LEAD":
                     st.divider()
                     c1, c2 = st.columns(2)
@@ -699,11 +753,11 @@ elif view_mode == "🧠 Psychometric & Interview":
 
 elif view_mode == "📍 Site & Contract":
     st.header("Site Vetting & Contracting")
-    targets = get_leads_by_stage(["SITE_SEARCH", "SITE_VETTING", "CONTRACTING"])
+    targets = get_leads_by_stage(["SITE_SEARCH", "SITE_PRE_VISIT", "SITE_POST_VISIT", "CONTRACTING"])
     if not targets: st.info("No pending contracts.")
     for l in targets: render_lead_card(l)
 
-elif view_mode == "✅ Contracted / Alumni":
+elif view_mode == "🤝🏽 Contracted / Alumni":
     st.header("Contracted Franchisees")
     targets = get_leads_by_stage(["CONTRACT_CLOSED"])
     if not targets: st.info("No contracted leads yet.")

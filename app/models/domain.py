@@ -30,7 +30,9 @@ class PipelineStage(str, Enum):
     
     # Gate 6: Site & Contract
     SITE_SEARCH = "SITE_SEARCH"
-    SITE_VETTING = "SITE_VETTING"
+    SITE_PRE_VISIT = "SITE_PRE_VISIT"    # New: Desktop Screening
+    SITE_POST_VISIT = "SITE_POST_VISIT"  # New: Field Scorecard
+    SITE_VETTING = "SITE_VETTING"        # Legacy / Transition
     CONTRACTING = "CONTRACTING"
     CONTRACT_CLOSED = "CONTRACT_CLOSED"
     
@@ -54,7 +56,7 @@ class ActivityLogEntry(BaseModel):
     class Config:
         use_enum_values = True
 
-# --- NEW: Financial Logic Structures ---
+# --- Financial Logic Structures ---
 class FinancialAssessmentData(BaseModel):
     # ABD Inputs (Statement Credits)
     statement_rows: List[Dict[str, Any]] = [] # [{date, credit_amount, include_deposit}]
@@ -84,6 +86,42 @@ class FinancialAssessmentResults(BaseModel):
     installment_pass: bool = False
     overall_pass: bool = False
 
+# --- NEW: Site Selection Logic Structures ---
+class SiteAssessmentData(BaseModel):
+    # Pre-Visit Checklist (Desktop Screening)
+    pre_visit_checklist: Dict[str, bool] = {
+        "photos_received": False,
+        "location_pin_received": False,
+        "not_too_remote": False,
+        "busy_area": False,
+        "ground_floor": False,
+        "building_state_good": False
+    }
+    
+    # Post-Visit Scorecard (Field Assessment)
+    setting_type: str = "Urban" # Urban / Semi-Urban / Rural
+    competition_clinics_1km: int = 0
+    competition_pharmacies_1km: int = 0
+    dist_nearest_public: float = 0.0
+    archetype_score: int = 1 # 1-4
+    building_sqft: float = 0.0
+    has_2_rooms: bool = False
+    ventilated_well_lit: bool = False
+    mobile_accessible: bool = False
+    electricity_available: bool = False
+    water_available: bool = False
+    internet_possible: bool = False
+    private_toilets: bool = False
+    foot_traffic_count: int = 0
+
+class SiteAssessmentResults(BaseModel):
+    competition_status: str = "Red" # Red / Amber / Green
+    foot_traffic_pass: bool = False
+    physical_criteria_pass: bool = False
+    utilities_pass: bool = False
+    overall_site_score: float = 0.0 # Percentage
+    overall_site_pass: bool = False
+
 class Lead(BaseModel):
     # --- Identity ---
     lead_id: str
@@ -111,9 +149,9 @@ class Lead(BaseModel):
     fit_classification: str = "Unscored"
     
     # --- Gate 2: Prioritization ---
-    priority_rank: int = 3  # 1=Site Ready, 2=Cash Ready, 3=Standard
-    rejection_type: Optional[str] = None  # "Hard", "Soft"
-    wake_up_date: Optional[str] = None    # For Warm Leads
+    priority_rank: int = 3  
+    rejection_type: Optional[str] = None  
+    wake_up_date: Optional[str] = None    
     soft_rejection_reason: Optional[str] = None
     
     # --- Gate 3: Engagement ---
@@ -133,12 +171,13 @@ class Lead(BaseModel):
     interview_date: Optional[str] = None
     
     # --- Gate 6: Site & Contract ---
-    site_visit_score: Optional[float] = None
+    site_assessment_data: SiteAssessmentData = Field(default_factory=SiteAssessmentData)
+    site_assessment_results: Optional[SiteAssessmentResults] = None
+    site_visit_score: Optional[float] = None # Legacy/Sync
     site_location_details: Optional[str] = None
     contract_generated_date: Optional[str] = None
     
     # --- Audit & History ---
-    # Notes are now part of activity_log, but we keep this field optional for backward compat
     notes: Optional[str] = None 
     activity_log: List[ActivityLogEntry] = []
     
@@ -155,7 +194,6 @@ class Lead(BaseModel):
         if isinstance(v, datetime): return v
         if not v: return datetime.now()
         try:
-            # Handles string timestamp often found in JSON
             if "T" in str(v):
                 return datetime.fromisoformat(str(v))
             return datetime.strptime(str(v).split('.')[0], "%Y-%m-%d %H:%M:%S")
