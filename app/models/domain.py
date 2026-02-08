@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, EmailStr, validator
 from enum import Enum
 from typing import Optional, Dict, List, Any, Union
-from datetime import datetime
+from datetime import datetime, date
 
 class PipelineStage(str, Enum):
     # Gate 1: Vetting
@@ -86,7 +86,7 @@ class FinancialAssessmentResults(BaseModel):
     installment_pass: bool = False
     overall_pass: bool = False
 
-# --- NEW: Site Selection Logic Structures ---
+# --- Site Selection Logic Structures ---
 class SiteAssessmentData(BaseModel):
     # Pre-Visit Checklist (Desktop Screening)
     pre_visit_checklist: Dict[str, bool] = {
@@ -121,6 +121,13 @@ class SiteAssessmentResults(BaseModel):
     utilities_pass: bool = False
     overall_site_score: float = 0.0 # Percentage
     overall_site_pass: bool = False
+
+# --- NEW: Cohort Model ---
+class Cohort(BaseModel):
+    name: str
+    start_date: date
+    end_date: date
+    created_at: datetime = Field(default_factory=datetime.now)
 
 class Lead(BaseModel):
     # --- Identity ---
@@ -173,7 +180,7 @@ class Lead(BaseModel):
     # --- Gate 6: Site & Contract ---
     site_assessment_data: SiteAssessmentData = Field(default_factory=SiteAssessmentData)
     site_assessment_results: Optional[SiteAssessmentResults] = None
-    site_visit_score: Optional[float] = None # Legacy/Sync
+    site_visit_score: Optional[float] = None 
     site_location_details: Optional[str] = None
     contract_generated_date: Optional[str] = None
     

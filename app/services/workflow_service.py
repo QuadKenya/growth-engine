@@ -1,11 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import json
 import os
 from app.core.config import settings
 from app.db.supabase import db
 from app.models.domain import (
     Lead, PipelineStage, ActivityLogEntry, ActivityType, 
-    FinancialAssessmentData, SiteAssessmentData
+    FinancialAssessmentData, SiteAssessmentData, Cohort
 )
 from app.services.scoring_service import scorer, fin_calc, site_calc
 from app.services.drafting_service import drafter
@@ -80,9 +80,10 @@ class WorkflowService:
             lead.draft_message = drafter.generate_draft(lead, "invite_to_call_priority")
         else:
             lead.draft_message = drafter.generate_draft(lead, "interest_check")
+            
         return db.upsert_lead(lead)
 
-    # --- GATE 2/3: ENGAGEMENT ---
+    # --- ENGAGEMENT ---
     def approve_draft(self, lead_id: str, message_override: str = None):
         """Human clicked 'Approve'."""
         lead = db.get_lead(lead_id)
@@ -209,7 +210,6 @@ class WorkflowService:
             if all(lead.site_assessment_data.pre_visit_checklist.values()):
                 lead.stage = PipelineStage.SITE_POST_VISIT
                 self.log_activity(lead, "Desktop Review Complete. Moved to Field Assessment.", ActivityType.TRANSITION)
-        
         db.upsert_lead(lead)
 
     def submit_site_scorecard(self, lead_id: str, scorecard_data: SiteAssessmentData):
@@ -238,7 +238,6 @@ class WorkflowService:
             if not results.physical_criteria_pass: reasons.append("Physical Criteria: FAIL")
             if not results.utilities_pass: reasons.append("Utilities: FAIL")
             if results.overall_site_score < 0.70: reasons.append("Score below 70%")
-            
             reason_str = ", ".join(reasons)
             lead.stage = PipelineStage.SITE_SEARCH
             self.log_activity(
@@ -254,6 +253,17 @@ class WorkflowService:
         lead.stage = PipelineStage.CONTRACT_CLOSED
         self.log_activity(lead, "Contract Signed! New Franchisee Onboarded.", ActivityType.TRANSITION)
         db.upsert_lead(lead)
+
+    # --- NEW: COHORT MANAGEMENT ---
+    def create_cohort(self, name: str, start_date: date, end_date: date):
+        cohort = Cohort(name=name, start_date=start_date, end_date=end_date)
+        return db.upsert_cohort(cohort)
+
+    def get_all_cohorts(self) -> list[Cohort]:
+        return db.fetch_all_cohorts()
+
+    def delete_cohort(self, name: str):
+        db.delete_cohort(name)
 
     # --- MANUAL UTILS ---
     def move_to_warm(self, lead_id: str):

@@ -648,6 +648,7 @@ with st.sidebar:
 
 # --- MAIN DASHBOARD LOGIC ---
 leads = db.fetch_all_leads()
+cohorts = workflow.get_all_cohorts()
 
 # Filter Helpers
 def get_leads_by_stage(stages):
@@ -765,269 +766,229 @@ elif view_mode == "🤝🏽 Contracted / Alumni":
 
 elif view_mode == "🔍 Master Database":
     st.header("Master Database")
-    st.caption("Search + filters on the left, inspect the full record on the right.")
+    st.caption("Analyze cohorts, search leads, and inspect full records.")
+
+    # 1. COHORT MANAGEMENT SECTION
+    with st.expander("📁 Manage Call-for-EOI Cohorts"):
+        c_form1, c_form2, c_form3 = st.columns([2, 3, 2])
+        with c_form1:
+            new_cohort_name = st.text_input("Cohort Name", placeholder="e.g. Q1 2025 Call", key="new_coh_name")
+        with c_form2:
+            # Independent date input for creation - defaults to last 30 days
+            new_cohort_dates = st.date_input(
+                "EOI Date Range", 
+                value=[date.today() - timedelta(days=30), date.today()],
+                key="new_coh_dates"
+            )
+        with c_form3:
+            st.write("") # Padding
+            if st.button("➕ Create Cohort", width='stretch'):
+                if new_cohort_name and isinstance(new_cohort_dates, (list, tuple)) and len(new_cohort_dates) == 2:
+                    workflow.create_cohort(new_cohort_name, new_cohort_dates[0], new_cohort_dates[1])
+                    st.toast(f"Cohort '{new_cohort_name}' defined successfully!")
+                    time.sleep(1)
+                    st.rerun()
+                else:
+                    st.error("Please provide a name and select both a Start and End date.")
+        
+        if cohorts:
+            st.divider()
+            st.caption("Active Cohort Definitions")
+            for c in cohorts:
+                cols = st.columns([3, 4, 1])
+                cols[0].write(f"**{c.name}**")
+                cols[1].write(f"{c.start_date.strftime('%d %b %Y')} — {c.end_date.strftime('%d %b %Y')}")
+                if cols[2].button("🗑️", key=f"del_{c.name}"):
+                    workflow.delete_cohort(c.name)
+                    st.rerun()
 
     if not leads:
-        st.info("No leads yet.")
+        st.info("No leads found in the database.")
     else:
-        # Full dataset (ALL fields)
+        # Data Preparation
         df_all = pd.DataFrame([l.dict() for l in leads])
-
-        # Ensure safe existence of common columns used in filters/table
-        for col in [
-            "lead_id",
-            "first_name",
-            "last_name",
-            "stage",
-            "priority_rank",
-            "fit_score",
-            "fit_classification",
-            "timestamp",
-            "draft_message",
-            "notes"
-        ]:
-            if col not in df_all.columns:
-                df_all[col] = None
-
-        # Name field
-        df_all["Name"] = (
-            df_all["first_name"].fillna("").astype(str).str.strip()
-            + " "
-            + df_all["last_name"].fillna("").astype(str).str.strip()
-        ).str.strip()
-
-        # Parse timestamps for date filter (tolerant)
+        # Ensure columns exist
+        for col in ["lead_id","first_name","last_name","stage","priority_rank","fit_score","fit_classification","timestamp","draft_message","notes"]:
+            if col not in df_all.columns: df_all[col] = None
+            
+        df_all["Name"] = (df_all["first_name"].fillna("").astype(str) + " " + df_all["last_name"].fillna("")).str.strip()
         df_all["_applied_dt"] = pd.to_datetime(df_all["timestamp"], errors="coerce")
 
-        # Skinny view (for filtering + table)
-        df_skinny = df_all[
-            ["lead_id", "Name", "stage", "priority_rank", "fit_score", "fit_classification", "timestamp", "_applied_dt", "draft_message", "notes"]
-        ].copy()
+        # Create filterable dataframe
+        df_skinny = df_all[["lead_id", "Name", "stage", "priority_rank", "fit_score", "fit_classification", "timestamp", "_applied_dt", "draft_message", "notes"]].copy()
+        df_skinny.rename(columns={
+            "lead_id":"ID",
+            "stage":"Stage",
+            "priority_rank":"Rank",
+            "fit_score":"Score",
+            "fit_classification":"Fit",
+            "timestamp":"Date",
+            "draft_message":"Action",
+            "notes":"Notes"
+        }, inplace=True)
 
-        df_skinny.rename(
-            columns={
-                "lead_id": "ID",
-                "stage": "Stage",
-                "priority_rank": "Rank",
-                "fit_score": "Score",
-                "fit_classification": "Fit Classification",
-                "timestamp": "Date",
-                "draft_message": "Draft Message",
-                "notes": "Internal Notes"
-            },
-            inplace=True,
-        )
-
-        # --- CLEAN FILTERS ROW ---
-        st.subheader("Filters")
-        f1, f2, f3, f4, f5 = st.columns([2, 2, 2, 3, 2])
-
+        # --- FILTERS ROW ---
+        st.subheader("Global Filters")
+        f0, f1, f2, f3, f4 = st.columns([2, 2, 2, 2, 2])
+        
+        with f0:
+            cohort_names = ["No Filter"] + [c.name for c in cohorts]
+            # Use index to avoid reset on rerun
+            selected_cohort_name = st.selectbox("Cohort (EOI Call)", options=cohort_names, key="master_cohort_filter")
+        
         with f1:
-            stage_opts = sorted(
-                [s for s in df_skinny["Stage"].dropna().astype(str).unique().tolist() if str(s).strip()]
-            )
-            stage_sel = st.multiselect("Stage", options=stage_opts, default=[])
+            stage_opts = sorted([str(s) for s in df_skinny["Stage"].dropna().unique().tolist() if str(s).strip()])
+            stage_sel = st.multiselect("Stage", options=stage_opts)
 
         with f2:
-            rank_numeric = pd.to_numeric(df_skinny["Rank"], errors="coerce")
-            rank_opts = sorted([int(x) for x in rank_numeric.dropna().unique().tolist()])
-            rank_sel = st.multiselect("Rank", options=rank_opts, default=[])
+            rank_opts = sorted([int(x) for x in pd.to_numeric(df_skinny["Rank"], errors="coerce").dropna().unique().tolist()])
+            rank_sel = st.multiselect("Priority Rank", options=rank_opts)
 
         with f3:
-            fit_opts = sorted(
-                [s for s in df_skinny["Fit Classification"].dropna().astype(str).unique().tolist() if str(s).strip()]
-            )
-            fit_sel = st.multiselect("Fit", options=fit_opts, default=[])
+            fit_opts = sorted([str(s) for s in df_skinny["Fit"].dropna().unique().tolist() if str(s).strip()])
+            fit_sel = st.multiselect("Vetting Class", options=fit_opts)
 
         with f4:
-            applied_dt = df_skinny["_applied_dt"]
-            dt_min = applied_dt.min()
-            dt_max = applied_dt.max()
-            today = date.today()
+            st.write("") # Spacer
+            only_action = st.checkbox("Action Required", help="Show only leads with pending drafts")
 
-            if pd.notna(dt_max):
-                default_end = dt_max.date()
-                default_start = (dt_max - pd.Timedelta(days=30)).date()
-            else:
-                default_end = today
-                default_start = today - timedelta(days=30)
+        # --- DATE RANGE SELECTION LOGIC ---
+        # If a cohort is selected, we suggest its dates, otherwise default to 30 days
+        if selected_cohort_name != "No Filter":
+            sel_c = next(c for c in cohorts if c.name == selected_cohort_name)
+            initial_start, initial_end = sel_c.start_date, sel_c.end_date
+        else:
+            initial_start = date.today() - timedelta(days=30)
+            initial_end = date.today()
 
-            min_date = dt_min.date() if pd.notna(dt_min) else (today - timedelta(days=365))
-            max_date = dt_max.date() if pd.notna(dt_max) else today
+        dr_col1, dr_col2 = st.columns([3, 2])
+        with dr_col1:
+            # We use a key to persist the date selection across partial clicks
+            date_range = st.date_input("Filter by Application Date", value=[initial_start, initial_end], key="master_date_range")
+        with dr_col2:
+            search = st.text_input("Global Search", placeholder="Name, ID, or Stage...", key="master_search")
 
-            date_range = st.date_input(
-                "Applied date range",
-                value=[max(default_start, min_date), min(default_end, max_date)],
-                min_value=min_date,
-                max_value=max_date,
-            )
-
-        with f5:
-            only_action = st.checkbox("Action required", value=False, help="Only show leads with a draft pending review.")
-
-        include_missing_dates = st.checkbox("Include leads with missing/invalid dates", value=True)
-
-        search = st.text_input("Search (Name, ID, Stage)", "")
-
-        # Apply filters to df_view
+        # --- APPLY ALL FILTERS ---
         df_view = df_skinny.copy()
 
-        if stage_sel:
-            df_view = df_view[df_view["Stage"].isin(stage_sel)]
+        # 1. Cohort Filter (Strict Date Bound)
+        if selected_cohort_name != "No Filter":
+            c = next(coh for coh in cohorts if coh.name == selected_cohort_name)
+            # start_dt, end_dt = pd.Timestamp(c.start_date), pd.Timestamp(c.end_date)
+            df_view = df_view[(df_view["_applied_dt"].dt.date >= c.start_date) & (df_view["_applied_dt"].dt.date <= c.end_date)]
 
-        if rank_sel:
-            df_view = df_view[pd.to_numeric(df_view["Rank"], errors="coerce").isin(rank_sel)]
+        # 2. Date Range Filter (Overrides/Refines Cohort)
+        if isinstance(date_range, (list, tuple)) and len(date_range) == 2:
+            start_date, end_date = date_range
+            df_view = df_view[(df_view["_applied_dt"].dt.date >= start_date) & (df_view["_applied_dt"].dt.date <= end_date)]
 
-        if fit_sel:
-            df_view = df_view[df_view["Fit Classification"].astype(str).isin(fit_sel)]
+        # 3. Categorical Filters
+        if stage_sel: df_view = df_view[df_view["Stage"].isin(stage_sel)]
+        if rank_sel: df_view = df_view[pd.to_numeric(df_view["Rank"], errors="coerce").isin(rank_sel)]
+        if fit_sel: df_view = df_view[df_view["Fit"].isin(fit_sel)]
+        if only_action: 
+            df_view = df_view[df_view["Action"].notna() & (df_view["Action"] != "")]
+        
+        # 4. Search Filter
+        if search and search.strip():
+            s = search.strip().lower()
 
-        if only_action:
-            df_view = df_view[df_view["Draft Message"].notna() & (df_view["Draft Message"].astype(str).str.strip() != "")]
-
-        start_date, end_date = _normalize_date_range(date_range)
-        start_dt = pd.Timestamp(datetime.combine(start_date, dt_time.min))
-        end_dt = pd.Timestamp(datetime.combine(end_date, dt_time.max))
-
-        if include_missing_dates:
-            mask = df_view["_applied_dt"].isna() | ((df_view["_applied_dt"] >= start_dt) & (df_view["_applied_dt"] <= end_dt))
-            df_view = df_view[mask]
-        else:
-            df_view = df_view[df_view["_applied_dt"].notna()]
-            df_view = df_view[(df_view["_applied_dt"] >= start_dt) & (df_view["_applied_dt"] <= end_dt)]
-
-        if search.strip():
-            s = search.strip()
             df_view = df_view[
-                df_view["Name"].str.contains(s, case=False, na=False)
-                | df_view["ID"].astype(str).str.contains(s, case=False, na=False)
-                | df_view["Stage"].astype(str).str.contains(s, case=False, na=False)
+                df_view["Name"].astype(str).str.lower().str.contains(s, na=False, regex=False) |
+                df_view["ID"].astype(str).str.lower().str.contains(s, na=False, regex=False) |
+                df_view["Stage"].astype(str).str.lower().str.contains(s, na=False, regex=False)
             ]
 
-        st.caption(f"Showing **{len(df_view)}** leads (out of {len(df_skinny)} total).")
+        st.info(f"Displaying **{len(df_view)}** records matching current filters.")
 
-        df_table = df_view[["ID", "Name", "Stage", "Rank", "Score", "Date", "Internal Notes"]].reset_index(drop=True)
-
-        def kv_df(d: dict) -> pd.DataFrame:
-            def to_cell(v):
-                if v is None:
-                    return ""
-                if isinstance(v, (dict, list)):
-                    return json.dumps(v, ensure_ascii=False, default=str)
-                return str(v)
-
-            return pd.DataFrame({"Field": list(d.keys()), "Value": [to_cell(d[k]) for k in d.keys()]})
-
-        def filter_existing(keys, all_keys):
-            return [k for k in keys if k in all_keys]
-
+        # --- RESULTS TABLE & DRAWER ---
         left, right = st.columns([2, 3], gap="large")
 
         with left:
-            st.subheader("Leads")
-            st.caption("Select a row to view full details →")
+            st.subheader("Lead Registry")
+            # Using data_editor for better selection performance
+            event = st.dataframe(
+                df_view[["ID", "Name", "Stage", "Rank", "Score", "Date"]], 
+                hide_index=True, 
+                on_select="rerun", 
+                selection_mode="single-row",
+                width='stretch'
+            )
             selected_id = None
-            try:
-                event = st.dataframe(
-                    df_table,
-                    width="stretch",
-                    hide_index=True,
-                    on_select="rerun",
-                    selection_mode="single-row",
-                )
-                if event and event.selection and event.selection.rows:
-                    row_idx = event.selection.rows[0]
-                    selected_id = df_table.iloc[row_idx]["ID"]
-            except TypeError:
-                if len(df_table):
-                    selected_id = st.selectbox("Select a lead", df_table["ID"].tolist(), index=0)
-                else:
-                    st.info("No matches for your filters/search.")
+            if event and event.selection and event.selection.rows:
+                selected_id = df_view.iloc[event.selection.rows[0]]["ID"]
 
         with right:
-            st.subheader("Detail Drawer")
-
+            st.subheader("Inspection Drawer")
             if not selected_id:
-                st.info("Select a lead from the table to view full details.")
+                st.write("Please select a lead from the registry to inspect full details.")
             else:
-                full_row = df_all[df_all["lead_id"] == selected_id]
-                if full_row.empty:
-                    st.warning("Selected lead not found.")
-                else:
-                    record = full_row.iloc[0].to_dict()
-                    all_keys = set(record.keys())
+                lead_data = df_all[df_all["lead_id"] == selected_id].iloc[0].to_dict()
+                t1, t2, t3, t4, t5 = st.tabs(["Profile", "Vetting", "Documents", "Log", "System Data"])
+                
+                with t1:
+                    st.write(f"**Full Name:** {lead_data.get('first_name')} {lead_data.get('middle_name','')} {lead_data.get('last_name')}")
+                    st.write(f"**Email:** {lead_data.get('email')}")
+                    st.write(f"**Phone:** {lead_data.get('phone')}")
+                    st.write(f"**Applied On:** {lead_data.get('timestamp')}")
+                    st.write(f"**Current Stage:** {lead_data.get('stage')}")
+                
+                with t2:
+                    st.write(f"**Fit Classification:** {lead_data.get('fit_classification')}")
+                    st.write(f"**Fit Score:** {lead_data.get('fit_score')}")
+                    st.write(f"**Priority Rank:** {lead_data.get('priority_rank')}")
+                    st.divider()
+                    st.write(f"**Profession:** {lead_data.get('current_profession')}")
+                    st.write(f"**Experience:** {lead_data.get('experience_years')}")
+                    st.write(f"**Financial Input:** {lead_data.get('financial_readiness_input')}")
 
-                    core_keys = filter_existing(
-                        [
-                            "lead_id",
-                            "first_name",
-                            "last_name",
-                            "Name",
-                            "stage",
-                            "priority_rank",
-                            "timestamp",
-                            "wake_up_date",
-                            "soft_rejection_reason",
-                        ],
-                        all_keys,
-                    )
-                    fit_keys = filter_existing(
-                        [
-                            "fit_score",
-                            "fit_classification",
-                            "financial_readiness_input",
-                            "location_status_input",
-                            "experience_years",
-                            "has_business_exp",
-                        ],
-                        all_keys,
-                    )
-                    contact_keys = filter_existing(
-                        ["email", "phone", "location_county_input", "current_profession"],
-                        all_keys,
-                    )
-                    kyc_keys = filter_existing(
-                        ["checklist_status", "kyc_status", "kyb_status", "documents_received"],
-                        all_keys,
-                    )
-                    meta_keys = filter_existing(
-                        ["draft_message", "notes", "raw_payload", "source", "created_at", "updated_at"],
-                        all_keys,
-                    )
+                with t3:
+                    chk = lead_data.get('checklist_status', {})
+                    if chk:
+                        st.write("**KYC Checklist Status:**")
+                        for item, status in chk.items():
+                            st.write(f"{'✅' if status else '❌'} {item}")
+                    else:
+                        st.info("No documents have been tracked for this lead yet.")
+                    
+                    if lead_data.get('verified_financial_capital'):
+                        st.success(f"**Verified Capital:** KES {lead_data.get('verified_financial_capital'):,.0f}")
 
-                    covered = set(core_keys + fit_keys + contact_keys + kyc_keys + meta_keys)
-                    extras = [k for k in record.keys() if k not in covered]
-                    meta_keys = meta_keys + extras
-
-                    tabs = st.tabs(["Core", "Fit", "Contact", "KYC", "Metadata", "Raw JSON"])
-
-                    with tabs[0]:
-                        st.dataframe(kv_df({k: record.get(k) for k in core_keys}), width="stretch", hide_index=True)
-
-                    with tabs[1]:
-                        st.dataframe(kv_df({k: record.get(k) for k in fit_keys}), width="stretch", hide_index=True)
-
-                    with tabs[2]:
-                        st.dataframe(kv_df({k: record.get(k) for k in contact_keys}), width="stretch", hide_index=True)
-
-                    with tabs[3]:
-                        # NEW: Enhanced KYC View
-                        checklist = record.get("checklist_status", {})
-                        if checklist:
-                            st.subheader("Checklist Details")
-                            df_chk = pd.DataFrame({
-                                "Document": list(checklist.keys()),
-                                "Status": ["✅ Received" if v else "❌ Pending" for v in checklist.values()]
-                            })
-                            st.dataframe(df_chk, width='stretch', hide_index=True)
-                        else:
-                            st.info("No checklist active.")
+                with t4:
+                    # Render the COMPLETE activity history
+                    history = lead_data.get('activity_log', [])
+                    if history:
+                        # Convert to DataFrame (handling Pydantic models or dicts)
+                        log_entries = [e.dict() if hasattr(e, 'dict') else e for e in history]
+                        log_df = pd.DataFrame(log_entries)
                         
-                        # Show non-checklist KYC fields below
-                        st.divider()
-                        st.dataframe(kv_df({k: record.get(k) for k in kyc_keys if k != "checklist_status"}), width='stretch', hide_index=True)
+                        # Ensure timestamp is readable and sorted newest first
+                        log_df['timestamp'] = pd.to_datetime(log_df['timestamp'])
+                        log_df = log_df.sort_values(by='timestamp', ascending=False)
+                        
+                        # Rename for clean headers
+                        log_df.rename(columns={
+                            "timestamp": "Time",
+                            "author": "User",
+                            "type": "Category",
+                            "content": "Description",
+                            "stage_snapshot": "Stage At Time"
+                        }, inplace=True)
 
-                    with tabs[4]:
-                        st.dataframe(kv_df({k: record.get(k) for k in meta_keys}), width="stretch", hide_index=True)
+                        st.write(f"**Full Activity History ({len(log_df)} entries)**")
+                        
+                        # Display scrollable interactive dataframe
+                        st.dataframe(
+                            log_df[["Time", "User", "Category", "Description", "Stage At Time"]],
+                            width='stretch',
+                            hide_index=True,
+                            column_config={
+                                "Time": st.column_config.DatetimeColumn("Time", format="DD/MM/YY HH:mm"),
+                                "Description": st.column_config.TextColumn("Description", width="large")
+                            }
+                        )
+                    else:
+                        st.info("No activity recorded for this lead yet.")
 
-                    with tabs[5]:
-                        st.json(record)
+                with t5:
+                    st.json(lead_data)
