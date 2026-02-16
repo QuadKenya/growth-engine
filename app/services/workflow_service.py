@@ -17,9 +17,13 @@ class WorkflowService:
         with open(checklist_path, "r") as f:
             self.checklists = json.load(f)
 
-    # --- HELPER: AUDIT LOGGING ---
+    # --- HELPER: AUDIT LOGGING & HISTORY TRACKING ---
     def log_activity(self, lead: Lead, content: str, type: ActivityType = ActivityType.SYSTEM, author: str = "System"):
-        """Appends an entry to the lead's activity log."""
+        """
+        Appends an entry to the lead's activity log.
+        CRITICAL: Automatically updates stage_history for Cycle Time reporting.
+        """
+        # 1. Create Log Entry
         entry = ActivityLogEntry(
             timestamp=datetime.now(),
             author=author,
@@ -31,9 +35,21 @@ class WorkflowService:
             lead.activity_log = []
         lead.activity_log.append(entry)
 
+        # 2. Update Stage History (First-time entry tracking)
+        if lead.stage_history is None:
+            lead.stage_history = {}
+        
+        # We store the timestamp of the FIRST time a lead enters a stage
+        stage_key = str(lead.stage)
+        if stage_key not in lead.stage_history:
+            lead.stage_history[stage_key] = datetime.now().isoformat()
+
     # --- GATE 1: INGESTION ---
     def process_incoming_lead(self, raw_data: dict) -> Lead:
         lead = Lead(**raw_data)
+        # Initialize history for the starting stage
+        lead.stage_history[str(PipelineStage.EXPRESSED_INTEREST)] = lead.timestamp.isoformat()
+        
         self.log_activity(lead, "Lead captured via Google Form.", ActivityType.SYSTEM)
         
         # 1. Hard Gates
@@ -58,6 +74,7 @@ class WorkflowService:
                 lead.stage = PipelineStage.WARM_LEAD
                 lead.rejection_type = "Soft"
                 lead.soft_rejection_reason = soft_check["reason"]
+                
                 days = 365 if soft_check["reason"] == "experience" else 90
                 lead.wake_up_date = (datetime.now() + timedelta(days=days)).strftime("%Y-%m-%d")
                 lead.draft_message = drafter.generate_draft(lead, f"soft_rejection_{soft_check['reason']}")
@@ -125,7 +142,7 @@ class WorkflowService:
         self.log_activity(lead, content, ActivityType.NOTE, author="Associate")
         db.upsert_lead(lead)
 
-    # --- GATE 4: COMPLIANCE ---
+    # --- COMPLIANCE & FINANCIALS ---
     def initialize_checklist(self, lead_id: str, type_override: str = None):
         """Start KYC/KYB."""
         lead = db.get_lead(lead_id)
@@ -180,7 +197,7 @@ class WorkflowService:
             
         db.upsert_lead(lead)
 
-    # --- GATE 5: ASSESSMENT ---
+    # --- ASSESSMENT ---
     def log_interview_result(self, lead_id: str, result: str, notes: str):
         lead = db.get_lead(lead_id)
         lead.interview_notes = notes
@@ -192,7 +209,7 @@ class WorkflowService:
             self.log_activity(lead, "Interview Failed. Turned Down.", ActivityType.TRANSITION)
         db.upsert_lead(lead)
 
-    # --- NEW: GATE 6: SITE SELECTION ---
+    # --- SITE SELECTION ---
     def start_site_review(self, lead_id: str):
         """Moves lead to Pre-Visit Desktop Review."""
         lead = db.get_lead(lead_id)
@@ -240,12 +257,7 @@ class WorkflowService:
             if results.overall_site_score < 0.70: reasons.append("Score below 70%")
             reason_str = ", ".join(reasons)
             lead.stage = PipelineStage.SITE_SEARCH
-            self.log_activity(
-                lead, 
-                f"Site REJECTED (Score: {results.overall_site_score*100:.0f}%). Reasons: {reason_str}. Returning to search.", 
-                ActivityType.TRANSITION
-            )
-            
+            self.log_activity(lead, f"Site REJECTED (Score: {results.overall_site_score*100:.0f}%). Reasons: {reason_str}. Returning to search.", ActivityType.TRANSITION)
         db.upsert_lead(lead)
 
     def close_contract(self, lead_id: str):
@@ -254,7 +266,7 @@ class WorkflowService:
         self.log_activity(lead, "Contract Signed! New Franchisee Onboarded.", ActivityType.TRANSITION)
         db.upsert_lead(lead)
 
-    # --- NEW: COHORT MANAGEMENT ---
+    # --- COHORT MANAGEMENT ---
     def create_cohort(self, name: str, start_date: date, end_date: date):
         cohort = Cohort(name=name, start_date=start_date, end_date=end_date)
         return db.upsert_cohort(cohort)
@@ -298,7 +310,6 @@ class WorkflowService:
         self.log_activity(lead, "Lead Reactivated from Warm Pool. Draft Regenerated.", ActivityType.TRANSITION)
         db.upsert_lead(lead)
 
-    # NEW: Update draft helper (was missing from previous file dump but used in dashboard)
     def update_draft(self, lead_id: str, new_text: str):
         lead = db.get_lead(lead_id)
         lead.draft_message = new_text

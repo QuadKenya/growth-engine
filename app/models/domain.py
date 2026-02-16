@@ -188,6 +188,10 @@ class Lead(BaseModel):
     notes: Optional[str] = None 
     activity_log: List[ActivityLogEntry] = []
     
+    # --- NEW: Cycle Time Tracking ---
+    # Stores the first time a lead enters a stage: {"KYC_SCREENING": "2023-01-01 10:00:00"}
+    stage_history: Dict[str, str] = {}
+    
     # --- Tracking ---
     last_contact_date: Optional[str] = None
     last_contact_channel: Optional[str] = None

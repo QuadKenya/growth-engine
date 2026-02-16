@@ -14,6 +14,7 @@ import streamlit.components.v1 as components
 
 from app.db.supabase import db
 from app.services.workflow_service import workflow
+from app.services.reporting_service import reporter
 
 # --- PAGE CONFIG ---
 st.set_page_config(
@@ -525,11 +526,6 @@ def render_lead_card(lead):
                             workflow.submit_site_scorecard(lead.lead_id, data)
                             st.rerun()
 
-                # if stage == "CONTRACTING":
-                #     st.success("🎉 Site Approved! Contract has been generated.")
-                #     if st.button("🚀 Finalize Onboarding", key=f"cc_{lead.lead_id}", width='stretch'):
-                #         workflow.close_contract(lead.lead_id); st.balloons(); st.rerun()
-
                 # Fire celebration on next rerun EVEN IF stage has already advanced
                 celebration_key = f"onboard_success_{lead.lead_id}"
                 if st.session_state.get(celebration_key):
@@ -547,7 +543,7 @@ def render_lead_card(lead):
                         st.rerun()
 
                 elif stage == "CONTRACT_CLOSED":
-                    st.success("Franchisee Onboarded ✅")
+                    st.success("Franchisee Onboarded 🎉")
 
                 
 		# --- WARM LEAD SPECIFIC ACTIONS (Reactivate / Reject) ---
@@ -596,6 +592,7 @@ with st.sidebar:
         "🧠 Psychometric & Interview",
         "📍 Site & Contract",
         "🤝🏽 Contracted / Alumni",
+	    "📈 KPI Reports",
         "🔍 Master Database"
     ],
     key="view_mode",
@@ -604,7 +601,7 @@ with st.sidebar:
     st.divider()
     
     # Simulation Lab
-    with st.expander("🧪 Simulation Lab"):
+    with st.expander("🧪 Simulation"):
         with st.form("sim_ingest", clear_on_submit=True):
             # CHANGED: Direct Text Input for Email
             email = st.text_input("Email", placeholder="candidate@example.com")
@@ -651,8 +648,7 @@ leads = db.fetch_all_leads()
 cohorts = workflow.get_all_cohorts()
 
 # Filter Helpers
-def get_leads_by_stage(stages):
-    return [l for l in leads if getattr(l, "stage", "") in stages]
+def get_leads_by_stage(stages): return [l for l in leads if getattr(l, "stage", "") in stages]
 
 # Metrics
 # UPDATED: Added Compliance Pending Metric
@@ -763,6 +759,142 @@ elif view_mode == "🤝🏽 Contracted / Alumni":
     targets = get_leads_by_stage(["CONTRACT_CLOSED"])
     if not targets: st.info("No contracted leads yet.")
     for l in targets: render_lead_card(l)
+
+if view_mode == "📈 KPI Reports":
+    st.header("Operational Intelligence")
+    
+    # 1. COHORT FILTER
+    c_names = ["All Time"] + [c.name for c in cohorts]
+    sel_cohort = st.selectbox("Analysis Cohort", c_names, help="Filter reports by a specific Call for EOI")
+    
+    report_leads = leads
+    if sel_cohort != "All Time":
+        c = next(x for x in cohorts if x.name == sel_cohort)
+        # Filter leads by application date falling within cohort range
+        report_leads = [
+            l for l in leads 
+            if getattr(l, 'timestamp', datetime.min) 
+            and l.timestamp.date() >= c.start_date 
+            and l.timestamp.date() <= c.end_date
+        ]
+    
+    # 2. RUN CALCULATIONS
+    stats = reporter.calculate_general_stats(report_leads)
+    funnel = reporter.calculate_funnel(report_leads)
+    cycles = reporter.calculate_cycle_times(report_leads)
+    
+    # 3. HEADLINE METRICS (SPEED & HEALTH)
+    # st.subheader("🚀 Velocity & Health")
+    m1, m2, m3, m4 = st.columns(4)
+    
+    with m1:
+        st.metric(
+            "Total Cycle", 
+            f"{cycles['avg_to_contract']} Days", 
+            help="Average time from Application to Contract Signed (Closed wins only)"
+        )
+    with m2:
+        st.metric(
+            "To Psychometric", 
+            f"{cycles['avg_to_psych']} Days", 
+            help="Average time to clear Vetting, Compliance, and Financials"
+        )
+    with m3:
+        st.metric(
+            "Rejection Rate", 
+            stats["rejection_rate"], 
+            help="% of applicants who were Hard Rejected (Quality indicator)",
+            delta_color="inverse"
+        )
+    with m4:
+        st.metric(
+            "Hot : Warm Ratio", 
+            stats["hot_warm_ratio"],
+            help="Balance between ready-to-close leads and nurturing leads"
+        )
+
+    st.divider()
+
+    # 4. DEEP DIVE VISUALS
+    c_left, c_right = st.columns([3, 2], gap="large")
+    
+    with c_left:
+        st.subheader("⏱️ Journey Velocity (Avg Days)")
+        st.caption("Time taken to reach specific milestones from Application Date.")
+        
+        # Prepare Data for Chart
+        if any(cycles["milestone_values"]):
+            journey_df = pd.DataFrame({
+                "Milestone": cycles["milestone_labels"],
+                "Days": cycles["milestone_values"]
+            })
+            # Visual Chart
+            st.bar_chart(data=journey_df, x="Milestone", y="Days", color="#2e86de")
+            
+            # Smart Insights / Bottleneck Detection
+            psych_days = cycles["avg_to_psych"]
+            contract_days = cycles["avg_to_contract"]
+            
+            if psych_days > 45:
+                st.error(f"⚠️ **Bottleneck Alert:** It takes {psych_days} days to reach Psychometrics. Review the Compliance/Financial collection process.")
+            elif psych_days > 0 and contract_days > (psych_days * 2):
+                st.warning("⚠️ **Closing Lag:** Site Vetting & Contracting is taking longer than the entire vetting process combined.")
+            elif psych_days > 0:
+                st.success("✅ **Velocity Check:** Pipeline is moving at a healthy pace.")
+        else:
+            st.info("No timeline data available for this cohort yet. Move leads through stages to generate velocity metrics.")
+
+    with c_right:
+        st.subheader("🎯 Conversion Funnel")
+        st.caption("Candidate drop-off at key gates.")
+        
+        if funnel:
+            # Table View
+            funnel_df = pd.DataFrame({
+                "Stage": funnel["labels"],
+                "Candidates": funnel["counts"],
+                "Conversion Rate": [f"{p:.1f}%" for p in funnel["percentages"]]
+            })
+            st.dataframe(funnel_df, width='stretch', hide_index=True)
+            
+            # Simple Text Summary
+            conversion = funnel.get("overall_conversion", 0)
+            if conversion > 0:
+                st.write(f"**Overall Success Rate:** {conversion:.1f}%")
+        else:
+            st.info("No funnel data.")
+
+    st.divider()
+
+    # 5. PREDICTIVE FORECASTING
+    st.subheader("🔮 Pipeline Forecasting")
+    f_col1, f_col2 = st.columns([1, 2])
+    
+    with f_col1:
+        target = st.number_input("Target New Contracts", min_value=1, value=10, help="How many new clinics do you want to open?")
+    
+    with f_col2:
+        forecast = reporter.generate_forecast(report_leads, target)
+        
+        if forecast["current_rate"] > 0:
+            req_leads = forecast["required_leads"]
+            curr_rate = forecast["current_rate"]
+            current_total = stats["total"]
+            gap = req_leads - current_total
+            
+            st.metric(
+                label=f"Required Applications (at {curr_rate}% conversion)", 
+                value=req_leads,
+                delta=f"-{gap} needed" if gap > 0 else "Target Met",
+                delta_color="normal" if gap <= 0 else "inverse"
+            )
+            
+            if gap > 0:
+                st.warning(f"Based on historical performance, you need to acquire **{gap}** more leads to hit your target of {target} contracts.")
+            else:
+                st.success(f"You have enough leads in the pipeline to hit your target of {target} contracts!")
+        else:
+            st.info("Insufficient data to forecast. Close at least one contract to establish a baseline conversion rate.")
 
 elif view_mode == "🔍 Master Database":
     st.header("Master Database")
