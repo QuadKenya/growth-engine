@@ -377,23 +377,136 @@
     "location_county_input": "Nairobi",
     "location_status_input": "Yes, I own or lease a location",
     "facility_meta": {},
-    "stage": "POTENTIAL_FIT",
+    "stage": "WARM_LEAD",
     "fit_score": 0.17,
     "fit_classification": "Fair/Conditional Fit",
     "priority_rank": 1,
-    "rejection_type": null,
-    "wake_up_date": null,
-    "soft_rejection_reason": null,
-    "draft_message": "TO: reject.ralph@test.com\nCHANNEL: WhatsApp (+254700000000)\n\nHabari Reject,\nYour application stood out\u2014especially since you have a location ready in Nairobi.\nWe are fast-tracking site owners. Are you available for a brief chat this week?",
+    "rejection_type": "Soft",
+    "wake_up_date": "2026-05-17",
+    "soft_rejection_reason": "Avg Balance (ABB) too low: 40,000 < 54k (Limit)",
+    "draft_message": null,
     "preferred_call_time": null,
-    "checklist_status": {},
+    "checklist_status": {
+      "Application Form": true,
+      "Intro to AA Signed": true,
+      "National ID / Passport": true,
+      "KRA PIN": true,
+      "Good Conduct Cert": true,
+      "CRB Clearance": true,
+      "Bank Statements (6 Months)": true,
+      "Proof of Residence": true,
+      "CV / Experience Proof": true,
+      "Valid Clinical License": true
+    },
     "checklist_type": "KYC_Individual",
     "financial_data": {
-      "statement_rows": [],
-      "abb_grid": {}
+      "statement_rows": [
+        {
+          "date": "2025-01-01",
+          "credit_amount": 280000.0,
+          "include_deposit": true
+        },
+        {
+          "date": "2025-02-01",
+          "credit_amount": 290000.0,
+          "include_deposit": true
+        },
+        {
+          "date": "2025-03-01",
+          "credit_amount": 250000.0,
+          "include_deposit": true
+        },
+        {
+          "date": "2025-04-01",
+          "credit_amount": 300000.0,
+          "include_deposit": true
+        },
+        {
+          "date": "2025-05-01",
+          "credit_amount": 280000.0,
+          "include_deposit": true
+        }
+      ],
+      "abb_grid": {
+        "Month 1": {
+          "5th": 40000.0,
+          "10th": 40000.0,
+          "15th": 40000.0,
+          "20th": 40000.0,
+          "25th": 40000.0,
+          "30th": 40000.0
+        },
+        "Month 2": {
+          "5th": 40000.0,
+          "10th": 40000.0,
+          "15th": 40000.0,
+          "20th": 40000.0,
+          "25th": 40000.0,
+          "30th": 40000.0
+        },
+        "Month 3": {
+          "5th": 40000.0,
+          "10th": 40000.0,
+          "15th": 40000.0,
+          "20th": 40000.0,
+          "25th": 40000.0,
+          "30th": 40000.0
+        },
+        "Month 4": {
+          "5th": 40000.0,
+          "10th": 40000.0,
+          "15th": 40000.0,
+          "20th": 40000.0,
+          "25th": 40000.0,
+          "30th": 40000.0
+        },
+        "Month 5": {
+          "5th": 40000.0,
+          "10th": 40000.0,
+          "15th": 40000.0,
+          "20th": 40000.0,
+          "25th": 40000.0,
+          "30th": 40000.0
+        },
+        "Month 6": {
+          "5th": 40000.0,
+          "10th": 40000.0,
+          "15th": 40000.0,
+          "20th": 40000.0,
+          "25th": 40000.0,
+          "30th": 40000.0
+        }
+      }
     },
-    "financial_results": null,
-    "verified_financial_capital": null,
+    "financial_results": {
+      "start_date": "2025-01-01",
+      "end_date": "2025-05-01",
+      "num_months": 5,
+      "sum_deposits": 1400000.0,
+      "abd": 280000.0,
+      "checkpoint_averages": {
+        "5th": 40000.0,
+        "10th": 40000.0,
+        "15th": 40000.0,
+        "20th": 40000.0,
+        "25th": 40000.0,
+        "30th": 40000.0
+      },
+      "abb": 40000.0,
+      "total_revenue": 280000.0,
+      "net_income_amount": 140000.0,
+      "installment_capacity_amount": 70000.0,
+      "abd_status": "PASS",
+      "abb_status": "FAIL",
+      "overall_status": "FAIL",
+      "reason_codes": [
+        "ABB_BELOW_MIN"
+      ],
+      "revenue_pass": true,
+      "installment_pass": true,
+      "overall_pass": false
+    },
+    "verified_financial_capital": 280000.0,
     "psychometric_score": null,
     "interview_notes": null,
     "interview_date": null,
@@ -440,12 +553,600 @@
         "type": "TRANSITION",
         "content": "Vetting Passed. Rank 1 (Fair/Conditional Fit).",
         "stage_snapshot": "POTENTIAL_FIT"
+      },
+      {
+        "timestamp": "2026-02-16 21:14:29.277493",
+        "author": "System",
+        "type": "EMAIL",
+        "content": "Message Approved & Sent.",
+        "stage_snapshot": "INTEREST_CHECK_SENT"
+      },
+      {
+        "timestamp": "2026-02-16 21:14:35.511972",
+        "author": "System",
+        "type": "ACTION",
+        "content": "Lead Replied YES. Sending FAQs.",
+        "stage_snapshot": "FAQ_SENT"
+      },
+      {
+        "timestamp": "2026-02-16 21:14:45.159755",
+        "author": "System",
+        "type": "EMAIL",
+        "content": "Message Approved & Sent.",
+        "stage_snapshot": "READY_FOR_CALL"
+      },
+      {
+        "timestamp": "2026-02-16 21:14:51.052465",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Started Compliance (KYC_Individual).",
+        "stage_snapshot": "KYC_SCREENING"
+      },
+      {
+        "timestamp": "2026-02-16 21:15:14.140132",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "All Docs Received. Moved to Financial Assessment.",
+        "stage_snapshot": "FINANCIAL_ASSESSMENT"
+      },
+      {
+        "timestamp": "2026-02-16 21:18:09.773251",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Financials FAILED. Reason: Avg Balance (ABB) too low: 40,000 < 54k (Limit). Moved to Warm Leads.",
+        "stage_snapshot": "WARM_LEAD"
       }
     ],
     "stage_history": {
-      "EXPRESSED_INTEREST": "2026-01-02T00:00:00"
+      "EXPRESSED_INTEREST": "2026-01-02T00:00:00",
+      "PipelineStage.INTEREST_CHECK_SENT": "2026-02-16T21:14:29.277502",
+      "PipelineStage.FAQ_SENT": "2026-02-16T21:14:35.511984",
+      "PipelineStage.READY_FOR_CALL": "2026-02-16T21:14:45.159763",
+      "PipelineStage.KYC_SCREENING": "2026-02-16T21:14:51.052478",
+      "PipelineStage.FINANCIAL_ASSESSMENT": "2026-02-16T21:15:14.140143",
+      "PipelineStage.WARM_LEAD": "2026-02-16T21:18:09.773260"
     },
-    "last_contact_date": null,
+    "last_contact_date": "2026-02-16 21:14:45",
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "john@test.com",
+    "timestamp": "2026-02-16 21:06:22",
+    "email": "john@test.com",
+    "first_name": "John",
+    "middle_name": null,
+    "last_name": "Kamau",
+    "phone": "254700000000",
+    "current_profession": "Clinical Officer",
+    "experience_years": "3-4+ Years",
+    "has_business_exp": "Yes",
+    "financial_readiness_input": "I have adequate resources",
+    "location_county_input": "Nairobi",
+    "location_status_input": "Yes, I own or lease a location",
+    "facility_meta": {},
+    "stage": "ASSESSMENT_INTERVIEW",
+    "fit_score": 0.2,
+    "fit_classification": "Ideal Fit",
+    "priority_rank": 1,
+    "rejection_type": null,
+    "wake_up_date": null,
+    "soft_rejection_reason": null,
+    "draft_message": null,
+    "preferred_call_time": null,
+    "checklist_status": {
+      "Application Form": true,
+      "Intro to AA Signed": true,
+      "National ID / Passport": true,
+      "KRA PIN": true,
+      "Good Conduct Cert": true,
+      "CRB Clearance": true,
+      "Bank Statements (6 Months)": true,
+      "Proof of Residence": true,
+      "CV / Experience Proof": true,
+      "Valid Clinical License": true
+    },
+    "checklist_type": "KYC_Individual",
+    "financial_data": {
+      "statement_rows": [
+        {
+          "date": "2025-01-01",
+          "credit_amount": 280000.0,
+          "include_deposit": true
+        },
+        {
+          "date": "2025-02-01",
+          "credit_amount": 280000.0,
+          "include_deposit": true
+        },
+        {
+          "date": "2025-03-01",
+          "credit_amount": 200000.0,
+          "include_deposit": true
+        },
+        {
+          "date": "2025-04-01",
+          "credit_amount": 300000.0,
+          "include_deposit": true
+        },
+        {
+          "date": "2025-05-01",
+          "credit_amount": 280000.0,
+          "include_deposit": true
+        }
+      ],
+      "abb_grid": {
+        "Month 1": {
+          "5th": 56000.0,
+          "10th": 56000.0,
+          "15th": 56000.0,
+          "20th": 56000.0,
+          "25th": 56000.0,
+          "30th": 56000.0
+        },
+        "Month 2": {
+          "5th": 56000.0,
+          "10th": 56000.0,
+          "15th": 56000.0,
+          "20th": 56000.0,
+          "25th": 56000.0,
+          "30th": 56000.0
+        },
+        "Month 3": {
+          "5th": 56000.0,
+          "10th": 56000.0,
+          "15th": 56000.0,
+          "20th": 56000.0,
+          "25th": 56000.0,
+          "30th": 56000.0
+        },
+        "Month 4": {
+          "5th": 56000.0,
+          "10th": 56000.0,
+          "15th": 56000.0,
+          "20th": 56000.0,
+          "25th": 56000.0,
+          "30th": 56000.0
+        },
+        "Month 5": {
+          "5th": 56000.0,
+          "10th": 56000.0,
+          "15th": 56000.0,
+          "20th": 56000.0,
+          "25th": 56000.0,
+          "30th": 56000.0
+        },
+        "Month 6": {
+          "5th": 56000.0,
+          "10th": 56000.0,
+          "15th": 56000.0,
+          "20th": 56000.0,
+          "25th": 56000.0,
+          "30th": 56000.0
+        }
+      }
+    },
+    "financial_results": {
+      "start_date": "2025-01-01",
+      "end_date": "2025-05-01",
+      "num_months": 5,
+      "sum_deposits": 1340000.0,
+      "abd": 268000.0,
+      "checkpoint_averages": {
+        "5th": 56000.0,
+        "10th": 56000.0,
+        "15th": 56000.0,
+        "20th": 56000.0,
+        "25th": 56000.0,
+        "30th": 56000.0
+      },
+      "abb": 56000.0,
+      "total_revenue": 268000.0,
+      "net_income_amount": 134000.0,
+      "installment_capacity_amount": 67000.0,
+      "abd_status": "PASS",
+      "abb_status": "BORDERLINE_PASS",
+      "overall_status": "PASS_WITH_MARGIN",
+      "reason_codes": [
+        "ABB_WITHIN_TOLERANCE"
+      ],
+      "revenue_pass": true,
+      "installment_pass": true,
+      "overall_pass": true
+    },
+    "verified_financial_capital": 268000.0,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_assessment_data": {
+      "pre_visit_checklist": {
+        "photos_received": false,
+        "location_pin_received": false,
+        "not_too_remote": false,
+        "busy_area": false,
+        "ground_floor": false,
+        "building_state_good": false
+      },
+      "setting_type": "Urban",
+      "competition_clinics_1km": 0,
+      "competition_pharmacies_1km": 0,
+      "dist_nearest_public": 0.0,
+      "archetype_score": 1,
+      "building_sqft": 0.0,
+      "has_2_rooms": false,
+      "ventilated_well_lit": false,
+      "mobile_accessible": false,
+      "electricity_available": false,
+      "water_available": false,
+      "internet_possible": false,
+      "private_toilets": false,
+      "foot_traffic_count": 0
+    },
+    "site_assessment_results": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": null,
+    "activity_log": [
+      {
+        "timestamp": "2026-02-16 21:06:22.556535",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-16 21:06:22.556667",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Vetting Passed. Rank 1 (Ideal Fit).",
+        "stage_snapshot": "POTENTIAL_FIT"
+      },
+      {
+        "timestamp": "2026-02-16 21:06:55.842708",
+        "author": "System",
+        "type": "EMAIL",
+        "content": "Message Approved & Sent.",
+        "stage_snapshot": "INTEREST_CHECK_SENT"
+      },
+      {
+        "timestamp": "2026-02-16 21:07:09.946083",
+        "author": "System",
+        "type": "ACTION",
+        "content": "Lead Replied YES. Sending FAQs.",
+        "stage_snapshot": "FAQ_SENT"
+      },
+      {
+        "timestamp": "2026-02-16 21:07:34.082843",
+        "author": "System",
+        "type": "EMAIL",
+        "content": "Message Approved & Sent.",
+        "stage_snapshot": "READY_FOR_CALL"
+      },
+      {
+        "timestamp": "2026-02-16 21:07:39.801666",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Started Compliance (KYC_Individual).",
+        "stage_snapshot": "KYC_SCREENING"
+      },
+      {
+        "timestamp": "2026-02-16 21:08:03.609985",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "All Docs Received. Moved to Financial Assessment.",
+        "stage_snapshot": "FINANCIAL_ASSESSMENT"
+      },
+      {
+        "timestamp": "2026-02-16 21:13:12.311127",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Financials PASSED (Within 10% Margin). Rev: 268,000, ABB: 56,000. Moved to Psychometric Assessment.",
+        "stage_snapshot": "ASSESSMENT_PSYCH"
+      }
+    ],
+    "stage_history": {
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-16T21:06:22",
+      "PipelineStage.POTENTIAL_FIT": "2026-02-16T21:06:22.556674",
+      "PipelineStage.INTEREST_CHECK_SENT": "2026-02-16T21:06:55.842717",
+      "PipelineStage.FAQ_SENT": "2026-02-16T21:07:09.946096",
+      "PipelineStage.READY_FOR_CALL": "2026-02-16T21:07:34.082852",
+      "PipelineStage.KYC_SCREENING": "2026-02-16T21:07:39.801678",
+      "PipelineStage.FINANCIAL_ASSESSMENT": "2026-02-16T21:08:03.609998",
+      "PipelineStage.ASSESSMENT_PSYCH": "2026-02-16T21:13:12.311137"
+    },
+    "last_contact_date": "2026-02-16 21:07:34",
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "mary@test.com",
+    "timestamp": "2026-02-16 21:09:29",
+    "email": "mary@test.com",
+    "first_name": "Mary",
+    "middle_name": null,
+    "last_name": "Otieno",
+    "phone": "254700000000",
+    "current_profession": "Nurse",
+    "experience_years": "3-4+ Years",
+    "has_business_exp": "Yes",
+    "financial_readiness_input": "I have adequate resources",
+    "location_county_input": "Nairobi",
+    "location_status_input": "Yes, I own or lease a location",
+    "facility_meta": {},
+    "stage": "WARM_LEAD",
+    "fit_score": 0.19,
+    "fit_classification": "Good Fit",
+    "priority_rank": 1,
+    "rejection_type": "Soft",
+    "wake_up_date": "2026-05-17",
+    "soft_rejection_reason": "Avg Balance (ABB) too low: 3,111 < 54k (Limit)",
+    "draft_message": null,
+    "preferred_call_time": null,
+    "checklist_status": {
+      "Application Form": true,
+      "Intro to AA Signed": true,
+      "National ID / Passport": true,
+      "KRA PIN": true,
+      "Good Conduct Cert": true,
+      "CRB Clearance": true,
+      "Bank Statements (6 Months)": true,
+      "Proof of Residence": true,
+      "CV / Experience Proof": true,
+      "Valid Clinical License": true
+    },
+    "checklist_type": "KYC_Individual",
+    "financial_data": {
+      "statement_rows": [
+        {
+          "date": "2025-01-01",
+          "credit_amount": 280000.0,
+          "include_deposit": true
+        },
+        {
+          "date": "2025-02-01",
+          "credit_amount": 290000.0,
+          "include_deposit": true
+        },
+        {
+          "date": "2025-03-01",
+          "credit_amount": 250000.0,
+          "include_deposit": true
+        },
+        {
+          "date": "2025-04-01",
+          "credit_amount": 280000.0,
+          "include_deposit": true
+        }
+      ],
+      "abb_grid": {
+        "Month 1": {
+          "5th": 56000.0,
+          "10th": 0.0,
+          "15th": 0.0,
+          "20th": 56000.0,
+          "25th": 0.0,
+          "30th": 0.0
+        },
+        "Month 2": {
+          "5th": 0.0,
+          "10th": 0.0,
+          "15th": 0.0,
+          "20th": 0.0,
+          "25th": 0.0,
+          "30th": 0.0
+        },
+        "Month 3": {
+          "5th": 0.0,
+          "10th": 0.0,
+          "15th": 0.0,
+          "20th": 0.0,
+          "25th": 0.0,
+          "30th": 0.0
+        },
+        "Month 4": {
+          "5th": 0.0,
+          "10th": 0.0,
+          "15th": 0.0,
+          "20th": 0.0,
+          "25th": 0.0,
+          "30th": 0.0
+        },
+        "Month 5": {
+          "5th": 0.0,
+          "10th": 0.0,
+          "15th": 0.0,
+          "20th": 0.0,
+          "25th": 0.0,
+          "30th": 0.0
+        },
+        "Month 6": {
+          "5th": 0.0,
+          "10th": 0.0,
+          "15th": 0.0,
+          "20th": 0.0,
+          "25th": 0.0,
+          "30th": 0.0
+        }
+      }
+    },
+    "financial_results": {
+      "start_date": "2025-01-01",
+      "end_date": "2025-04-01",
+      "num_months": 4,
+      "sum_deposits": 1100000.0,
+      "abd": 275000.0,
+      "checkpoint_averages": {
+        "5th": 9333.333333333334,
+        "10th": 0.0,
+        "15th": 0.0,
+        "20th": 9333.333333333334,
+        "25th": 0.0,
+        "30th": 0.0
+      },
+      "abb": 3111.1111111111113,
+      "total_revenue": 275000.0,
+      "net_income_amount": 137500.0,
+      "installment_capacity_amount": 68750.0,
+      "abd_status": "PASS",
+      "abb_status": "FAIL",
+      "overall_status": "FAIL",
+      "reason_codes": [
+        "ABB_BELOW_MIN"
+      ],
+      "revenue_pass": true,
+      "installment_pass": true,
+      "overall_pass": false
+    },
+    "verified_financial_capital": 275000.0,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_assessment_data": {
+      "pre_visit_checklist": {
+        "photos_received": false,
+        "location_pin_received": false,
+        "not_too_remote": false,
+        "busy_area": false,
+        "ground_floor": false,
+        "building_state_good": false
+      },
+      "setting_type": "Urban",
+      "competition_clinics_1km": 0,
+      "competition_pharmacies_1km": 0,
+      "dist_nearest_public": 0.0,
+      "archetype_score": 1,
+      "building_sqft": 0.0,
+      "has_2_rooms": false,
+      "ventilated_well_lit": false,
+      "mobile_accessible": false,
+      "electricity_available": false,
+      "water_available": false,
+      "internet_possible": false,
+      "private_toilets": false,
+      "foot_traffic_count": 0
+    },
+    "site_assessment_results": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": null,
+    "activity_log": [
+      {
+        "timestamp": "2026-02-16 21:09:29.401843",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-16 21:09:29.401934",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Vetting Passed. Rank 1 (Good Fit).",
+        "stage_snapshot": "POTENTIAL_FIT"
+      },
+      {
+        "timestamp": "2026-02-16 22:50:03.709145",
+        "author": "System",
+        "type": "EMAIL",
+        "content": "Message Approved & Sent.",
+        "stage_snapshot": "INTEREST_CHECK_SENT"
+      },
+      {
+        "timestamp": "2026-02-16 22:50:09.295967",
+        "author": "System",
+        "type": "ACTION",
+        "content": "Lead Replied YES. Sending FAQs.",
+        "stage_snapshot": "FAQ_SENT"
+      },
+      {
+        "timestamp": "2026-02-16 22:50:14.028318",
+        "author": "System",
+        "type": "EMAIL",
+        "content": "Message Approved & Sent.",
+        "stage_snapshot": "READY_FOR_CALL"
+      },
+      {
+        "timestamp": "2026-02-16 22:50:19.245503",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Started Compliance (KYC_Individual).",
+        "stage_snapshot": "KYC_SCREENING"
+      },
+      {
+        "timestamp": "2026-02-16 22:50:42.264139",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "All Docs Received. Moved to Financial Assessment.",
+        "stage_snapshot": "FINANCIAL_ASSESSMENT"
+      },
+      {
+        "timestamp": "2026-02-16 22:58:18.180857",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Financials FAILED. Reason: Avg Balance (ABB) too low: 0 < 54k (Limit). Moved to Warm Leads.",
+        "stage_snapshot": "WARM_LEAD"
+      },
+      {
+        "timestamp": "2026-02-16 23:05:13.115533",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Lead Reactivated from Warm Pool. Draft Regenerated.",
+        "stage_snapshot": "POTENTIAL_FIT"
+      },
+      {
+        "timestamp": "2026-02-16 23:05:24.809429",
+        "author": "System",
+        "type": "EMAIL",
+        "content": "Message Approved & Sent.",
+        "stage_snapshot": "INTEREST_CHECK_SENT"
+      },
+      {
+        "timestamp": "2026-02-16 23:05:29.520406",
+        "author": "System",
+        "type": "ACTION",
+        "content": "Lead Replied YES. Sending FAQs.",
+        "stage_snapshot": "FAQ_SENT"
+      },
+      {
+        "timestamp": "2026-02-16 23:05:33.838245",
+        "author": "System",
+        "type": "EMAIL",
+        "content": "Message Approved & Sent.",
+        "stage_snapshot": "READY_FOR_CALL"
+      },
+      {
+        "timestamp": "2026-02-16 23:05:38.652809",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Started Compliance (KYC_Individual).",
+        "stage_snapshot": "KYC_SCREENING"
+      },
+      {
+        "timestamp": "2026-02-16 23:05:55.323622",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "All Docs Received. Moved to Financial Assessment.",
+        "stage_snapshot": "FINANCIAL_ASSESSMENT"
+      },
+      {
+        "timestamp": "2026-02-16 23:07:32.701018",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Financials FAILED. Reason: Avg Balance (ABB) too low: 3,111 < 54k (Limit). Moved to Warm Leads.",
+        "stage_snapshot": "WARM_LEAD"
+      }
+    ],
+    "stage_history": {
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-16T21:09:29",
+      "PipelineStage.POTENTIAL_FIT": "2026-02-16T21:09:29.401941",
+      "PipelineStage.INTEREST_CHECK_SENT": "2026-02-16T22:50:03.709156",
+      "PipelineStage.FAQ_SENT": "2026-02-16T22:50:09.295981",
+      "PipelineStage.READY_FOR_CALL": "2026-02-16T22:50:14.028326",
+      "PipelineStage.KYC_SCREENING": "2026-02-16T22:50:19.245514",
+      "PipelineStage.FINANCIAL_ASSESSMENT": "2026-02-16T22:50:42.264153",
+      "PipelineStage.WARM_LEAD": "2026-02-16T22:58:18.180868"
+    },
+    "last_contact_date": "2026-02-16 23:05:33",
     "last_contact_channel": null
   }
 ]

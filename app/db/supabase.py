@@ -2,89 +2,135 @@ import json
 import os
 from typing import List, Optional
 from app.models.domain import Lead, Cohort
-from app.core.config import settings
+from supabase import create_client, Client
+import streamlit as st
 
-# Paths for local simulation
-LEAD_DB_PATH = settings.BASE_DIR / "data" / "local_db.json"
-COHORT_DB_PATH = settings.BASE_DIR / "data" / "cohort_db.json"
-
-class SupabaseClient:
+class DatabaseClient:
     def __init__(self):
-        self._init_db()
-
-    def _init_db(self):
-        """Ensure data directory and JSON files exist."""
-        if not os.path.exists(LEAD_DB_PATH.parent):
-            os.makedirs(LEAD_DB_PATH.parent)
+        self.use_cloud = False
+        self.client: Optional[Client] = None
         
-        for path in [LEAD_DB_PATH, COHORT_DB_PATH]:
-            if not os.path.exists(path):
-                with open(path, "w") as f:
-                    json.dump([], f)
+        url = os.environ.get("SUPABASE_URL")
+        key = os.environ.get("SUPABASE_KEY")
+
+        # Try loading from Streamlit secrets (Cloud Mode) safely
+        if not url:
+            try:
+                # This checks if the key exists without crashing if secrets.toml is missing
+                if "SUPABASE_URL" in st.secrets:
+                    url = st.secrets["SUPABASE_URL"]
+                    key = st.secrets["SUPABASE_KEY"]
+            except Exception:
+                # Secrets file not found, ignore and use local mode
+                pass
+
+        # If credentials exist and point to a real Supabase instance
+        if url and key and "127.0.0.1" not in url:
+            try:
+                self.client = create_client(url, key)
+                self.use_cloud = True
+                print("✅ Connected to Supabase Cloud")
+            except Exception as e:
+                print(f"⚠️ Failed to connect to Supabase: {e}. Falling back to local JSON.")
+        
+        if not self.use_cloud:
+            self._init_local_db()
+
+    def _init_local_db(self):
+        from app.core.config import settings
+        self.LEAD_PATH = settings.BASE_DIR / "data" / "local_db.json"
+        self.COHORT_PATH = settings.BASE_DIR / "data" / "cohort_db.json"
+        
+        if not os.path.exists(self.LEAD_PATH.parent):
+            os.makedirs(self.LEAD_PATH.parent)
+        
+        for p in [self.LEAD_PATH, self.COHORT_PATH]:
+            if not os.path.exists(p):
+                with open(p, "w") as f: json.dump([], f)
 
     # --- LEAD METHODS ---
-    def _read_leads(self) -> List[dict]:
-        with open(LEAD_DB_PATH, "r") as f:
-            try:
-                return json.load(f)
-            except json.JSONDecodeError:
-                return []
-
-    def _write_leads(self, data: List[dict]):
-        with open(LEAD_DB_PATH, "w") as f:
-            json.dump(data, f, indent=2, default=str)
-
-    def reset_db(self):
-        """Safely clears the database."""
-        self._write_file([])
-
     def upsert_lead(self, lead: Lead) -> Lead:
-        data = self._read_leads()
-        data = [item for item in data if item["lead_id"] != lead.lead_id]
-        data.append(lead.dict())
-        self._write_leads(data)
+        lead_dict = lead.dict()
+        if self.use_cloud:
+            payload = {"id": lead.lead_id, "data": lead_dict}
+            self.client.table("leads").upsert(payload).execute()
+        else:
+            data = self._read_json(self.LEAD_PATH)
+            data = [i for i in data if i["lead_id"] != lead.lead_id]
+            data.append(lead_dict)
+            self._write_json(self.LEAD_PATH, data)
         return lead
 
-    def get_lead(self, lead_id: str) -> Optional[Lead]:
-        data = self._read_leads()
-        for item in data:
-            if item["lead_id"] == lead_id:
-                return Lead(**item)
-        return None
-
     def fetch_all_leads(self) -> List[Lead]:
-        data = self._read_leads()
-        data.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
-        return [Lead(**item) for item in data]
+        if self.use_cloud:
+            response = self.client.table("leads").select("data").execute()
+            return [Lead(**row['data']) for row in response.data]
+        else:
+            data = self._read_json(self.LEAD_PATH)
+            return [Lead(**i) for i in data]
 
-    # --- NEW: COHORT METHODS ---
-    def _read_cohorts(self) -> List[dict]:
-        with open(COHORT_DB_PATH, "r") as f:
-            try:
-                return json.load(f)
-            except json.JSONDecodeError:
-                return []
+    def get_lead(self, lead_id: str) -> Optional[Lead]:
+        if self.use_cloud:
+            response = self.client.table("leads").select("data").eq("id", lead_id).execute()
+            if response.data:
+                return Lead(**response.data[0]['data'])
+            return None
+        else:
+            data = self._read_json(self.LEAD_PATH)
+            for i in data:
+                if i["lead_id"] == lead_id: return Lead(**i)
+            return None
 
-    def _write_cohorts(self, data: List[dict]):
-        with open(COHORT_DB_PATH, "w") as f:
-            json.dump(data, f, indent=2, default=str)
-
+    # --- COHORT METHODS ---
     def upsert_cohort(self, cohort: Cohort) -> Cohort:
-        data = self._read_cohorts()
-        # Remove if existing name
-        data = [c for c in data if c["name"] != cohort.name]
-        data.append(cohort.dict())
-        self._write_cohorts(data)
+        c_dict = cohort.dict()
+        c_dict['start_date'] = c_dict['start_date'].isoformat()
+        c_dict['end_date'] = c_dict['end_date'].isoformat()
+        
+        if self.use_cloud:
+            payload = {"name": cohort.name, "data": c_dict}
+            self.client.table("cohorts").upsert(payload).execute()
+        else:
+            data = self._read_json(self.COHORT_PATH)
+            data = [c for c in data if c["name"] != cohort.name]
+            data.append(c_dict)
+            self._write_json(self.COHORT_PATH, data)
         return cohort
 
     def fetch_all_cohorts(self) -> List[Cohort]:
-        data = self._read_cohorts()
-        return [Cohort(**item) for item in data]
+        if self.use_cloud:
+            response = self.client.table("cohorts").select("data").execute()
+            return [Cohort(**row['data']) for row in response.data]
+        else:
+            data = self._read_json(self.COHORT_PATH)
+            return [Cohort(**i) for i in data]
 
-    def delete_cohort(self, cohort_name: str):
-        data = self._read_cohorts()
-        data = [c for c in data if c["name"] != cohort_name]
-        self._write_cohorts(data)
+    def delete_cohort(self, name: str):
+        if self.use_cloud:
+            self.client.table("cohorts").delete().eq("name", name).execute()
+        else:
+            data = self._read_json(self.COHORT_PATH)
+            data = [c for c in data if c["name"] != name]
+            self._write_json(self.COHORT_PATH, data)
 
-# Singleton
-db = SupabaseClient()
+    # --- UTILS ---
+    def reset_db(self):
+        """Safely clears the database."""
+        if self.use_cloud:
+            # Dangerous in cloud, usually we skip this or require admin rights
+            # For this MVP, we won't implement cloud wipe to prevent accidents
+            print("⚠️ Reset DB ignored in Cloud Mode.")
+        else:
+            self._write_json(self.LEAD_PATH, [])
+            self._write_json(self.COHORT_PATH, [])
+
+    def _read_json(self, path):
+        with open(path, "r") as f:
+            try: return json.load(f)
+            except: return []
+
+    def _write_json(self, path, data):
+        with open(path, "w") as f:
+            json.dump(data, f, indent=2, default=str)
+
+db = DatabaseClient()

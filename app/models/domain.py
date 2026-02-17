@@ -46,6 +46,13 @@ class ActivityType(str, Enum):
     ACTION = "ACTION"
     SYSTEM = "SYSTEM"
 
+class FinancialStatus(str, Enum):
+    PASS = "PASS"
+    FAIL = "FAIL"
+    BORDERLINE_PASS = "BORDERLINE_PASS"
+    PASS_WITH_MARGIN = "PASS_WITH_MARGIN"
+    NOT_EVALUATED = "NOT_EVALUATED"
+
 class ActivityLogEntry(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.now)
     author: str = "System"  # "System" or "Associate"
@@ -60,28 +67,34 @@ class ActivityLogEntry(BaseModel):
 class FinancialAssessmentData(BaseModel):
     # ABD Inputs (Statement Credits)
     statement_rows: List[Dict[str, Any]] = [] # [{date, credit_amount, include_deposit}]
-    
+
     # ABB Inputs: 6 months x 6 checkpoints
     abb_grid: Dict[str, Dict[str, Optional[float]]] = {} # {"Month 1": {"5th": 100, ...}}
 
 class FinancialAssessmentResults(BaseModel):
-    # ABD Results
+    # Calculations
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     num_months: int = 0
     sum_deposits: float = 0.0
     abd: float = 0.0
-    
+
     # ABB Results
     checkpoint_averages: Dict[str, float] = {}
     abb: float = 0.0
     
-    # Capacity Results
+    # Capacity
     total_revenue: float = 0.0
     net_income_amount: float = 0.0
     installment_capacity_amount: float = 0.0
     
-    # Decisions
+    # Detailed Decisioning (New)
+    abd_status: FinancialStatus = FinancialStatus.NOT_EVALUATED
+    abb_status: FinancialStatus = FinancialStatus.NOT_EVALUATED
+    overall_status: FinancialStatus = FinancialStatus.NOT_EVALUATED
+    reason_codes: List[str] = []
+    
+    # Legacy booleans (Maintained for backward compatibility/UI)
     revenue_pass: bool = False
     installment_pass: bool = False
     overall_pass: bool = False
@@ -188,8 +201,7 @@ class Lead(BaseModel):
     notes: Optional[str] = None 
     activity_log: List[ActivityLogEntry] = []
     
-    # --- NEW: Cycle Time Tracking ---
-    # Stores the first time a lead enters a stage: {"KYC_SCREENING": "2023-01-01 10:00:00"}
+    # --- Cycle Time Tracking ---
     stage_history: Dict[str, str] = {}
     
     # --- Tracking ---

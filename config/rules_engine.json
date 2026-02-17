@@ -1,6 +1,6 @@
 {
-  "version": "2025.4",
-  "description": "Full Logic: Hard Gates, Scoring, and Site Vetting Rubric",
+  "version": "2025.5",
+  "description": "Added Financial Assessment ABB Tolerance logic",
   
   "hard_gates": {
     "biz_exp": "No",
@@ -112,6 +112,12 @@
       "4": 1.0
     },
     "pass_threshold_percent": 0.70
+  },
+
+  "financial_logic": {
+    "abd_min_revenue": 240000,
+    "abb_threshold": 60000,
+    "abb_tolerance": 0.10
   },
 
   "readiness_maps": {

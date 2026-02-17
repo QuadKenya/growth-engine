@@ -1,5 +1,8 @@
 from app.core.config import settings
-from app.models.domain import Lead, FinancialAssessmentData, FinancialAssessmentResults, SiteAssessmentData, SiteAssessmentResults
+from app.models.domain import (
+    Lead, FinancialAssessmentData, FinancialAssessmentResults, 
+    SiteAssessmentData, SiteAssessmentResults, FinancialStatus
+)
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
@@ -75,9 +78,7 @@ class ScoringService:
     def calculate_score(self, lead: Lead) -> Dict[str, Any]:
         model = self.config["scoring_model"]["gate_1"]
         total_score = 0.0
-        
         lead_data = lead.dict()
-        
         for criterion in model:
             input_val = lead_data.get(criterion["input_field"])
             points = 0.0
@@ -99,8 +100,11 @@ class ScoringService:
             if score >= t["min_score"]: return t["label"]
         return "Not A Fit"
 
-# --- NEW: Financial Assessment Logic ---
 class FinancialCalculator:
+    def __init__(self):
+        # Load params from config
+        self.config = settings.RULES_CONFIG.get("financial_logic", {})
+
     @staticmethod
     def excel_datedif_m_plus_1(start_date: datetime, end_date: datetime) -> int:
         """Replicates Excel's DATEDIF(start, end, 'm') + 1 logic."""
@@ -119,9 +123,8 @@ class FinancialCalculator:
     def calculate_assessment(self, data: FinancialAssessmentData) -> FinancialAssessmentResults:
         res = FinancialAssessmentResults()
         
-        # --- 1. ABD CALCULATIONS ---
+        # --- 1. ABD CALCULATIONS (Math) ---
         if data.statement_rows:
-            # Parse dates safely
             parsed_dates = []
             for r in data.statement_rows:
                 d_str = r.get('date')
@@ -132,39 +135,80 @@ class FinancialCalculator:
                 res.start_date = min(parsed_dates).strftime("%Y-%m-%d")
                 res.end_date = max(parsed_dates).strftime("%Y-%m-%d")
                 res.num_months = self.excel_datedif_m_plus_1(min(parsed_dates), max(parsed_dates))
-                
-                # Sum credits where include is True
-                res.sum_deposits = sum(
-                    float(r.get('credit_amount', 0) or 0) 
-                    for r in data.statement_rows 
-                    if r.get('include_deposit') in [True, "Yes", "yes"]
-                )
+                res.sum_deposits = sum(float(r.get('credit_amount', 0) or 0) for r in data.statement_rows if r.get('include_deposit') in [True, "Yes", "yes"])
                 res.abd = res.sum_deposits / res.num_months if res.num_months > 0 else 0
         
-        # --- 2. ABB CALCULATIONS ---
+        # --- 2. ABB CALCULATIONS (Math) ---
         checkpoints = ["5th", "10th", "15th", "20th", "25th", "30th"]
         for cp in checkpoints:
-            cp_values = []
-            for m_key in data.abb_grid:
-                val = data.abb_grid[m_key].get(cp)
-                cp_values.append(val)
+            cp_values = [data.abb_grid[m_key].get(cp) for m_key in data.abb_grid]
             res.checkpoint_averages[cp] = self.excel_average(cp_values)
-        
-        # Overall ABB is average of the checkpoint averages
         res.abb = self.excel_average(list(res.checkpoint_averages.values()))
 
-        # --- 3. CAPACITY & DECISIONS ---
+        # --- 3. CAPACITY DERIVATIONS ---
         res.total_revenue = res.abd 
         res.net_income_amount = res.total_revenue * 0.5
-        res.installment_capacity_amount = res.net_income_amount * 0.5 # 0.25 of Total Revenue
+        res.installment_capacity_amount = res.net_income_amount * 0.5 
         
-        # Thresholds (Greater than 240k and 60k)
-        res.revenue_pass = res.total_revenue > 240000
+        # --- 4. DECISION LOGIC (The Amendment) ---
+        
+        # Config Params
+        abd_min = self.config.get("abd_min_revenue", 240000)
+        abb_target = self.config.get("abb_threshold", 60000)
+        abb_tolerance = self.config.get("abb_tolerance", 0.10)
+        abb_lower_limit = abb_target * (1 - abb_tolerance)
+        
+        res.reason_codes = []
+
+        # STAGE 1: ABD Check (Hard Gate)
+        # "If ABD fails minimum requirement -> fail overall immediately; ABB is not evaluated."
+        if res.total_revenue < abd_min:
+            res.abd_status = FinancialStatus.FAIL
+            res.abb_status = FinancialStatus.NOT_EVALUATED
+            res.overall_status = FinancialStatus.FAIL
+            res.reason_codes.append("ABD_BELOW_MIN")
+            
+            # Sync Legacy Booleans
+            res.revenue_pass = False
+            res.overall_pass = False
+            res.installment_pass = False
+            
+            return res # Stop decisioning
+
+        # If we are here, ABD Passed
+        res.abd_status = FinancialStatus.PASS
+        res.revenue_pass = True
+        
+        # STAGE 2: ABB Check (Decisive with Tolerance)
+        # "Only if ABD passes... check ABB"
+        
+        if res.abb >= abb_target:
+            # Clear pass
+            res.abb_status = FinancialStatus.PASS
+            res.overall_status = FinancialStatus.PASS
+            # reason_codes remain empty (Clean Pass)
+            
+        elif res.abb >= abb_lower_limit:
+            # Within 10% Margin
+            res.abb_status = FinancialStatus.BORDERLINE_PASS
+            res.overall_status = FinancialStatus.PASS_WITH_MARGIN
+            res.reason_codes.append("ABB_WITHIN_TOLERANCE")
+            
+        else:
+            # Fail
+            res.abb_status = FinancialStatus.FAIL
+            res.overall_status = FinancialStatus.FAIL
+            res.reason_codes.append("ABB_BELOW_MIN")
+
+        # Sync Legacy Booleans for UI compatibility
+        # PASS or PASS_WITH_MARGIN counts as True for overall_pass
+        res.overall_pass = (res.overall_status in [FinancialStatus.PASS, FinancialStatus.PASS_WITH_MARGIN])
+        
+        # Legacy field (kept for consistency with old logic description, though ABB is now decisive)
         res.installment_pass = res.installment_capacity_amount > 60000
-        res.overall_pass = res.revenue_pass and res.installment_pass
+
         return res
 
-# --- NEW: Site Vetting Logic ---
 class SiteCalculator:
     def __init__(self):
         self.config = settings.RULES_CONFIG.get("site_vetting_logic", {})
@@ -220,10 +264,9 @@ class SiteCalculator:
         archetype_val = arch_map.get(str(data.archetype_score), 0.25)
 
         # 6. Cumulative Percentage
-        # (Comp + Traffic + Phys + Utils + Arch) / 5
         res.overall_site_score = (comp_score + traffic_score + physical_score + utilities_score + archetype_val) / 5.0
         
-        # Pass Condition: No Red Competition AND Traffic Pass AND Score > Threshold
+        # Pass Condition
         threshold = self.config.get("pass_threshold_percent", 0.70)
         res.overall_site_pass = (
             res.competition_status != "Red" and 
