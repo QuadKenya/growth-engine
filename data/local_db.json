@@ -1,104 +1,12 @@
 [
   {
-    "lead_id": "flash.gordon@test.com",
-    "timestamp": "2026-01-01 00:00:00",
-    "email": "flash.gordon@test.com",
-    "first_name": "Flash",
+    "lead_id": "john.kamau@test.com",
+    "timestamp": "2026-02-16 13:52:59",
+    "email": "john.kamau@test.com",
+    "first_name": "John",
     "middle_name": null,
-    "last_name": "Gordon",
-    "phone": "254700000000",
-    "current_profession": "Medical Doctor",
-    "experience_years": "3-4+ Years",
-    "has_business_exp": "Yes",
-    "financial_readiness_input": "I have adequate resources",
-    "location_county_input": "Nairobi",
-    "location_status_input": "Yes, I own or lease a location",
-    "facility_meta": {},
-    "stage": "CONTRACT_CLOSED",
-    "fit_score": 0.2,
-    "fit_classification": "Ideal Fit",
-    "priority_rank": 1,
-    "rejection_type": null,
-    "wake_up_date": null,
-    "soft_rejection_reason": null,
-    "draft_message": "TO: flash.gordon@test.com\nCHANNEL: WhatsApp (+254700000000)\n\nHabari Flash,\nYour application stood out\u2014especially since you have a location ready in Nairobi.\nWe are fast-tracking site owners. Are you available for a brief chat this week?",
-    "preferred_call_time": null,
-    "checklist_status": {},
-    "checklist_type": "KYC_Individual",
-    "financial_data": {
-      "statement_rows": [
-        {}
-      ],
-      "abb_grid": {}
-    },
-    "financial_results": null,
-    "verified_financial_capital": 500000,
-    "psychometric_score": null,
-    "interview_notes": null,
-    "interview_date": null,
-    "site_assessment_data": {
-      "pre_visit_checklist": {
-        "photos_received": false,
-        "location_pin_received": false,
-        "not_too_remote": false,
-        "busy_area": false,
-        "ground_floor": false,
-        "building_state_good": false
-      },
-      "setting_type": "Urban",
-      "competition_clinics_1km": 0,
-      "competition_pharmacies_1km": 0,
-      "dist_nearest_public": 0.0,
-      "archetype_score": 1,
-      "building_sqft": 0.0,
-      "has_2_rooms": false,
-      "ventilated_well_lit": false,
-      "mobile_accessible": false,
-      "electricity_available": false,
-      "water_available": false,
-      "internet_possible": false,
-      "private_toilets": false,
-      "foot_traffic_count": 0
-    },
-    "site_assessment_results": null,
-    "site_visit_score": null,
-    "site_location_details": null,
-    "contract_generated_date": "2026-01-08",
-    "notes": null,
-    "activity_log": [
-      {
-        "timestamp": "2026-02-12 11:24:47.097524",
-        "author": "System",
-        "type": "SYSTEM",
-        "content": "Lead captured via Google Form.",
-        "stage_snapshot": "EXPRESSED_INTEREST"
-      },
-      {
-        "timestamp": "2026-02-12 11:24:47.097656",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "Vetting Passed. Rank 1 (Ideal Fit).",
-        "stage_snapshot": "POTENTIAL_FIT"
-      }
-    ],
-    "stage_history": {
-      "EXPRESSED_INTEREST": "2026-01-01T00:00:00",
-      "FAQ_SENT": "2026-01-02T00:00:00",
-      "KYC_SCREENING": "2026-01-03T00:00:00",
-      "ASSESSMENT_PSYCH": "2026-01-05T00:00:00",
-      "CONTRACT_CLOSED": "2026-01-08T00:00:00"
-    },
-    "last_contact_date": null,
-    "last_contact_channel": null
-  },
-  {
-    "lead_id": "joe.normal@test.com",
-    "timestamp": "2026-01-01 00:00:00",
-    "email": "joe.normal@test.com",
-    "first_name": "Joe",
-    "middle_name": null,
-    "last_name": "Normal",
-    "phone": "254700000000",
+    "last_name": "Kamau",
+    "phone": "254700000001",
     "current_profession": "Clinical Officer",
     "experience_years": "3-4+ Years",
     "has_business_exp": "Yes",
@@ -106,106 +14,14 @@
     "location_county_input": "Nairobi",
     "location_status_input": "Yes, I own or lease a location",
     "facility_meta": {},
-    "stage": "CONTRACT_CLOSED",
+    "stage": "POTENTIAL_FIT",
     "fit_score": 0.2,
     "fit_classification": "Ideal Fit",
     "priority_rank": 1,
     "rejection_type": null,
     "wake_up_date": null,
     "soft_rejection_reason": null,
-    "draft_message": "TO: joe.normal@test.com\nCHANNEL: WhatsApp (+254700000000)\n\nHabari Joe,\nYour application stood out\u2014especially since you have a location ready in Nairobi.\nWe are fast-tracking site owners. Are you available for a brief chat this week?",
-    "preferred_call_time": null,
-    "checklist_status": {},
-    "checklist_type": "KYC_Individual",
-    "financial_data": {
-      "statement_rows": [
-        {}
-      ],
-      "abb_grid": {}
-    },
-    "financial_results": null,
-    "verified_financial_capital": 500000,
-    "psychometric_score": null,
-    "interview_notes": null,
-    "interview_date": null,
-    "site_assessment_data": {
-      "pre_visit_checklist": {
-        "photos_received": false,
-        "location_pin_received": false,
-        "not_too_remote": false,
-        "busy_area": false,
-        "ground_floor": false,
-        "building_state_good": false
-      },
-      "setting_type": "Urban",
-      "competition_clinics_1km": 0,
-      "competition_pharmacies_1km": 0,
-      "dist_nearest_public": 0.0,
-      "archetype_score": 1,
-      "building_sqft": 0.0,
-      "has_2_rooms": false,
-      "ventilated_well_lit": false,
-      "mobile_accessible": false,
-      "electricity_available": false,
-      "water_available": false,
-      "internet_possible": false,
-      "private_toilets": false,
-      "foot_traffic_count": 0
-    },
-    "site_assessment_results": null,
-    "site_visit_score": null,
-    "site_location_details": null,
-    "contract_generated_date": "2026-01-31",
-    "notes": null,
-    "activity_log": [
-      {
-        "timestamp": "2026-02-12 11:24:47.098989",
-        "author": "System",
-        "type": "SYSTEM",
-        "content": "Lead captured via Google Form.",
-        "stage_snapshot": "EXPRESSED_INTEREST"
-      },
-      {
-        "timestamp": "2026-02-12 11:24:47.099042",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "Vetting Passed. Rank 1 (Ideal Fit).",
-        "stage_snapshot": "POTENTIAL_FIT"
-      }
-    ],
-    "stage_history": {
-      "EXPRESSED_INTEREST": "2026-01-01T00:00:00",
-      "FAQ_SENT": "2026-01-03T00:00:00",
-      "KYC_SCREENING": "2026-01-08T00:00:00",
-      "ASSESSMENT_PSYCH": "2026-01-15T00:00:00",
-      "CONTRACT_CLOSED": "2026-01-31T00:00:00"
-    },
-    "last_contact_date": null,
-    "last_contact_channel": null
-  },
-  {
-    "lead_id": "stuck.stacy@test.com",
-    "timestamp": "2026-01-07 00:00:00",
-    "email": "stuck.stacy@test.com",
-    "first_name": "Stuck",
-    "middle_name": null,
-    "last_name": "Stacy",
-    "phone": "254700000000",
-    "current_profession": "Nurse",
-    "experience_years": "3-4+ Years",
-    "has_business_exp": "Yes",
-    "financial_readiness_input": "I have adequate resources",
-    "location_county_input": "Nairobi",
-    "location_status_input": "Yes, I own or lease a location",
-    "facility_meta": {},
-    "stage": "KYC_SCREENING",
-    "fit_score": 0.19,
-    "fit_classification": "Good Fit",
-    "priority_rank": 1,
-    "rejection_type": null,
-    "wake_up_date": null,
-    "soft_rejection_reason": null,
-    "draft_message": "TO: stuck.stacy@test.com\nCHANNEL: WhatsApp (+254700000000)\n\nHabari Stuck,\nYour application stood out\u2014especially since you have a location ready in Nairobi.\nWe are fast-tracking site owners. Are you available for a brief chat this week?",
+    "draft_message": "TO: john.kamau@test.com\nCHANNEL: WhatsApp (+254700000001)\n\nHabari John,\nYour application stood out\u2014especially since you have a location ready in Nairobi.\nWe are fast-tracking site owners. Are you available for a brief chat this week?",
     "preferred_call_time": null,
     "checklist_status": {},
     "checklist_type": "KYC_Individual",
@@ -249,36 +65,731 @@
     "notes": null,
     "activity_log": [
       {
-        "timestamp": "2026-02-12 11:24:47.100134",
+        "timestamp": "2026-02-17 15:52:59.707664",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-02-12 11:24:47.100186",
+        "timestamp": "2026-02-17 15:52:59.708115",
         "author": "System",
         "type": "TRANSITION",
-        "content": "Vetting Passed. Rank 1 (Good Fit).",
+        "content": "Vetting Passed. Rank 1 (Ideal Fit).",
         "stage_snapshot": "POTENTIAL_FIT"
       }
     ],
     "stage_history": {
-      "EXPRESSED_INTEREST": "2026-01-07T00:00:00",
-      "FAQ_SENT": "2026-01-08T00:00:00",
-      "KYC_SCREENING": "2026-01-12T00:00:00"
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-16T13:52:59",
+      "PipelineStage.POTENTIAL_FIT": "2026-02-17T15:52:59.708122"
     },
     "last_contact_date": null,
     "last_contact_channel": null
   },
   {
-    "lead_id": "slow.sam@test.com",
-    "timestamp": "2026-01-07 00:00:00",
-    "email": "slow.sam@test.com",
-    "first_name": "Slow",
+    "lead_id": "sarah.hassan@test.com",
+    "timestamp": "2026-02-15 10:52:59",
+    "email": "sarah.hassan@test.com",
+    "first_name": "Sarah",
     "middle_name": null,
-    "last_name": "Sam",
-    "phone": "254700000000",
+    "last_name": "Hassan",
+    "phone": "254700000002",
+    "current_profession": "Nurse",
+    "experience_years": "3-4+ Years",
+    "has_business_exp": "Yes",
+    "financial_readiness_input": "I need a loan",
+    "location_county_input": "Kiambu",
+    "location_status_input": "No, but I have found ideal locations",
+    "facility_meta": {},
+    "stage": "POTENTIAL_FIT",
+    "fit_score": 0.19,
+    "fit_classification": "Good Fit",
+    "priority_rank": 3,
+    "rejection_type": null,
+    "wake_up_date": null,
+    "soft_rejection_reason": null,
+    "draft_message": "TO: sarah.hassan@test.com\nCHANNEL: WhatsApp (+254700000002)\n\nHabari Sarah,\n\nThank you for applying to Curafa! We have reviewed your application and you meet our initial vetting criteria.\nBefore we proceed to the next stage, are you still interested in moving forward right now?\nReply YES to proceed, or let us know if you prefer to wait.",
+    "preferred_call_time": null,
+    "checklist_status": {},
+    "checklist_type": "KYC_Individual",
+    "financial_data": {
+      "statement_rows": [],
+      "abb_grid": {}
+    },
+    "financial_results": null,
+    "verified_financial_capital": null,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_assessment_data": {
+      "pre_visit_checklist": {
+        "photos_received": false,
+        "location_pin_received": false,
+        "not_too_remote": false,
+        "busy_area": false,
+        "ground_floor": false,
+        "building_state_good": false
+      },
+      "setting_type": "Urban",
+      "competition_clinics_1km": 0,
+      "competition_pharmacies_1km": 0,
+      "dist_nearest_public": 0.0,
+      "archetype_score": 1,
+      "building_sqft": 0.0,
+      "has_2_rooms": false,
+      "ventilated_well_lit": false,
+      "mobile_accessible": false,
+      "electricity_available": false,
+      "water_available": false,
+      "internet_possible": false,
+      "private_toilets": false,
+      "foot_traffic_count": 0
+    },
+    "site_assessment_results": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": null,
+    "activity_log": [
+      {
+        "timestamp": "2026-02-17 15:52:59.708560",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-17 15:52:59.708604",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Vetting Passed. Rank 3 (Good Fit).",
+        "stage_snapshot": "POTENTIAL_FIT"
+      }
+    ],
+    "stage_history": {
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-15T10:52:59",
+      "PipelineStage.POTENTIAL_FIT": "2026-02-17T15:52:59.708609"
+    },
+    "last_contact_date": null,
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "peter.omondi@test.com",
+    "timestamp": "2026-02-14 14:52:59",
+    "email": "peter.omondi@test.com",
+    "first_name": "Peter",
+    "middle_name": null,
+    "last_name": "Omondi",
+    "phone": "254700000003",
+    "current_profession": "Clinical Officer",
+    "experience_years": "1-2 Years",
+    "has_business_exp": "Yes",
+    "financial_readiness_input": "I have adequate resources",
+    "location_county_input": "Mombasa",
+    "location_status_input": "Yes, I own or lease a location",
+    "facility_meta": {},
+    "stage": "POTENTIAL_FIT",
+    "fit_score": 0.18,
+    "fit_classification": "Fair/Conditional Fit",
+    "priority_rank": 1,
+    "rejection_type": null,
+    "wake_up_date": null,
+    "soft_rejection_reason": null,
+    "draft_message": "TO: peter.omondi@test.com\nCHANNEL: WhatsApp (+254700000003)\n\nHabari Peter,\nYour application stood out\u2014especially since you have a location ready in Mombasa.\nWe are fast-tracking site owners. Are you available for a brief chat this week?",
+    "preferred_call_time": null,
+    "checklist_status": {},
+    "checklist_type": "KYC_Individual",
+    "financial_data": {
+      "statement_rows": [],
+      "abb_grid": {}
+    },
+    "financial_results": null,
+    "verified_financial_capital": null,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_assessment_data": {
+      "pre_visit_checklist": {
+        "photos_received": false,
+        "location_pin_received": false,
+        "not_too_remote": false,
+        "busy_area": false,
+        "ground_floor": false,
+        "building_state_good": false
+      },
+      "setting_type": "Urban",
+      "competition_clinics_1km": 0,
+      "competition_pharmacies_1km": 0,
+      "dist_nearest_public": 0.0,
+      "archetype_score": 1,
+      "building_sqft": 0.0,
+      "has_2_rooms": false,
+      "ventilated_well_lit": false,
+      "mobile_accessible": false,
+      "electricity_available": false,
+      "water_available": false,
+      "internet_possible": false,
+      "private_toilets": false,
+      "foot_traffic_count": 0
+    },
+    "site_assessment_results": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": null,
+    "activity_log": [
+      {
+        "timestamp": "2026-02-17 15:52:59.709222",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-17 15:52:59.709261",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Vetting Passed. Rank 1 (Fair/Conditional Fit).",
+        "stage_snapshot": "POTENTIAL_FIT"
+      }
+    ],
+    "stage_history": {
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-14T14:52:59",
+      "PipelineStage.POTENTIAL_FIT": "2026-02-17T15:52:59.709266"
+    },
+    "last_contact_date": null,
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "david.lagat@test.com",
+    "timestamp": "2026-02-13 11:52:59",
+    "email": "david.lagat@test.com",
+    "first_name": "David",
+    "middle_name": null,
+    "last_name": "Lagat",
+    "phone": "254700000004",
+    "current_profession": "Shopkeeper",
+    "experience_years": "None",
+    "has_business_exp": "No",
+    "financial_readiness_input": "I need a loan",
+    "location_county_input": "Nairobi",
+    "location_status_input": "No",
+    "facility_meta": {},
+    "stage": "NO_FIT",
+    "fit_score": 0.0,
+    "fit_classification": "Unscored",
+    "priority_rank": 3,
+    "rejection_type": "Hard",
+    "wake_up_date": null,
+    "soft_rejection_reason": null,
+    "draft_message": "TO: david.lagat@test.com\nCHANNEL: WhatsApp (+254700000004)\n\nDear David,\nBased on our current criteria regarding No Business Experience, we cannot proceed with your application at this time.",
+    "preferred_call_time": null,
+    "checklist_status": {},
+    "checklist_type": "KYC_Individual",
+    "financial_data": {
+      "statement_rows": [],
+      "abb_grid": {}
+    },
+    "financial_results": null,
+    "verified_financial_capital": null,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_assessment_data": {
+      "pre_visit_checklist": {
+        "photos_received": false,
+        "location_pin_received": false,
+        "not_too_remote": false,
+        "busy_area": false,
+        "ground_floor": false,
+        "building_state_good": false
+      },
+      "setting_type": "Urban",
+      "competition_clinics_1km": 0,
+      "competition_pharmacies_1km": 0,
+      "dist_nearest_public": 0.0,
+      "archetype_score": 1,
+      "building_sqft": 0.0,
+      "has_2_rooms": false,
+      "ventilated_well_lit": false,
+      "mobile_accessible": false,
+      "electricity_available": false,
+      "water_available": false,
+      "internet_possible": false,
+      "private_toilets": false,
+      "foot_traffic_count": 0
+    },
+    "site_assessment_results": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": "No Business Experience",
+    "activity_log": [
+      {
+        "timestamp": "2026-02-17 15:52:59.709817",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-17 15:52:59.709835",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Hard Rejection: No Business Experience",
+        "stage_snapshot": "NO_FIT"
+      }
+    ],
+    "stage_history": {
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-13T11:52:59",
+      "PipelineStage.NO_FIT": "2026-02-17T15:52:59.709841"
+    },
+    "last_contact_date": null,
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "alice.mutua@test.com",
+    "timestamp": "2026-02-12 13:52:59",
+    "email": "alice.mutua@test.com",
+    "first_name": "Alice",
+    "middle_name": null,
+    "last_name": "Mutua",
+    "phone": "254700000005",
+    "current_profession": "Nurse",
+    "experience_years": "3-4+ Years",
+    "has_business_exp": "Yes",
+    "financial_readiness_input": "I have adequate resources",
+    "location_county_input": "Nakuru",
+    "location_status_input": "No, but I have found ideal locations",
+    "facility_meta": {},
+    "stage": "POTENTIAL_FIT",
+    "fit_score": 0.19,
+    "fit_classification": "Good Fit",
+    "priority_rank": 2,
+    "rejection_type": null,
+    "wake_up_date": null,
+    "soft_rejection_reason": null,
+    "draft_message": "TO: alice.mutua@test.com\nCHANNEL: WhatsApp (+254700000005)\n\nHabari Alice,\n\nThank you for applying to Curafa! We have reviewed your application and you meet our initial vetting criteria.\nBefore we proceed to the next stage, are you still interested in moving forward right now?\nReply YES to proceed, or let us know if you prefer to wait.",
+    "preferred_call_time": null,
+    "checklist_status": {},
+    "checklist_type": "KYC_Individual",
+    "financial_data": {
+      "statement_rows": [],
+      "abb_grid": {}
+    },
+    "financial_results": null,
+    "verified_financial_capital": null,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_assessment_data": {
+      "pre_visit_checklist": {
+        "photos_received": false,
+        "location_pin_received": false,
+        "not_too_remote": false,
+        "busy_area": false,
+        "ground_floor": false,
+        "building_state_good": false
+      },
+      "setting_type": "Urban",
+      "competition_clinics_1km": 0,
+      "competition_pharmacies_1km": 0,
+      "dist_nearest_public": 0.0,
+      "archetype_score": 1,
+      "building_sqft": 0.0,
+      "has_2_rooms": false,
+      "ventilated_well_lit": false,
+      "mobile_accessible": false,
+      "electricity_available": false,
+      "water_available": false,
+      "internet_possible": false,
+      "private_toilets": false,
+      "foot_traffic_count": 0
+    },
+    "site_assessment_results": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": null,
+    "activity_log": [
+      {
+        "timestamp": "2026-02-17 15:52:59.710453",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-17 15:52:59.710490",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Vetting Passed. Rank 2 (Good Fit).",
+        "stage_snapshot": "POTENTIAL_FIT"
+      }
+    ],
+    "stage_history": {
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-12T13:52:59",
+      "PipelineStage.POTENTIAL_FIT": "2026-02-17T15:52:59.710494"
+    },
+    "last_contact_date": null,
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "grace.soi@test.com",
+    "timestamp": "2026-02-11 09:52:59",
+    "email": "grace.soi@test.com",
+    "first_name": "Grace",
+    "middle_name": null,
+    "last_name": "Soi",
+    "phone": "254700000006",
+    "current_profession": "Medical Doctor",
+    "experience_years": "3-4+ Years",
+    "has_business_exp": "Yes",
+    "financial_readiness_input": "I have adequate resources",
+    "location_county_input": "Nairobi",
+    "location_status_input": "Yes, I own or lease a location",
+    "facility_meta": {},
+    "stage": "POTENTIAL_FIT",
+    "fit_score": 0.2,
+    "fit_classification": "Ideal Fit",
+    "priority_rank": 1,
+    "rejection_type": null,
+    "wake_up_date": null,
+    "soft_rejection_reason": null,
+    "draft_message": "TO: grace.soi@test.com\nCHANNEL: WhatsApp (+254700000006)\n\nHabari Grace,\nYour application stood out\u2014especially since you have a location ready in Nairobi.\nWe are fast-tracking site owners. Are you available for a brief chat this week?",
+    "preferred_call_time": null,
+    "checklist_status": {},
+    "checklist_type": "KYC_Individual",
+    "financial_data": {
+      "statement_rows": [],
+      "abb_grid": {}
+    },
+    "financial_results": null,
+    "verified_financial_capital": null,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_assessment_data": {
+      "pre_visit_checklist": {
+        "photos_received": false,
+        "location_pin_received": false,
+        "not_too_remote": false,
+        "busy_area": false,
+        "ground_floor": false,
+        "building_state_good": false
+      },
+      "setting_type": "Urban",
+      "competition_clinics_1km": 0,
+      "competition_pharmacies_1km": 0,
+      "dist_nearest_public": 0.0,
+      "archetype_score": 1,
+      "building_sqft": 0.0,
+      "has_2_rooms": false,
+      "ventilated_well_lit": false,
+      "mobile_accessible": false,
+      "electricity_available": false,
+      "water_available": false,
+      "internet_possible": false,
+      "private_toilets": false,
+      "foot_traffic_count": 0
+    },
+    "site_assessment_results": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": null,
+    "activity_log": [
+      {
+        "timestamp": "2026-02-17 15:52:59.711275",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-17 15:52:59.711309",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Vetting Passed. Rank 1 (Ideal Fit).",
+        "stage_snapshot": "POTENTIAL_FIT"
+      }
+    ],
+    "stage_history": {
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-11T09:52:59",
+      "PipelineStage.POTENTIAL_FIT": "2026-02-17T15:52:59.711313"
+    },
+    "last_contact_date": null,
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "brian.bosire@test.com",
+    "timestamp": "2026-02-10 12:52:59",
+    "email": "brian.bosire@test.com",
+    "first_name": "Brian",
+    "middle_name": null,
+    "last_name": "Bosire",
+    "phone": "254700000007",
+    "current_profession": "Clinical Officer",
+    "experience_years": "1-2 Years",
+    "has_business_exp": "No",
+    "financial_readiness_input": "I need a loan",
+    "location_county_input": "Kisumu",
+    "location_status_input": "No",
+    "facility_meta": {},
+    "stage": "NO_FIT",
+    "fit_score": 0.0,
+    "fit_classification": "Unscored",
+    "priority_rank": 3,
+    "rejection_type": "Hard",
+    "wake_up_date": null,
+    "soft_rejection_reason": null,
+    "draft_message": "TO: brian.bosire@test.com\nCHANNEL: WhatsApp (+254700000007)\n\nDear Brian,\nBased on our current criteria regarding No Business Experience, we cannot proceed with your application at this time.",
+    "preferred_call_time": null,
+    "checklist_status": {},
+    "checklist_type": "KYC_Individual",
+    "financial_data": {
+      "statement_rows": [],
+      "abb_grid": {}
+    },
+    "financial_results": null,
+    "verified_financial_capital": null,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_assessment_data": {
+      "pre_visit_checklist": {
+        "photos_received": false,
+        "location_pin_received": false,
+        "not_too_remote": false,
+        "busy_area": false,
+        "ground_floor": false,
+        "building_state_good": false
+      },
+      "setting_type": "Urban",
+      "competition_clinics_1km": 0,
+      "competition_pharmacies_1km": 0,
+      "dist_nearest_public": 0.0,
+      "archetype_score": 1,
+      "building_sqft": 0.0,
+      "has_2_rooms": false,
+      "ventilated_well_lit": false,
+      "mobile_accessible": false,
+      "electricity_available": false,
+      "water_available": false,
+      "internet_possible": false,
+      "private_toilets": false,
+      "foot_traffic_count": 0
+    },
+    "site_assessment_results": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": "No Business Experience",
+    "activity_log": [
+      {
+        "timestamp": "2026-02-17 15:52:59.711914",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-17 15:52:59.711930",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Hard Rejection: No Business Experience",
+        "stage_snapshot": "NO_FIT"
+      }
+    ],
+    "stage_history": {
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-10T12:52:59",
+      "PipelineStage.NO_FIT": "2026-02-17T15:52:59.711933"
+    },
+    "last_contact_date": null,
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "faith.njeri@test.com",
+    "timestamp": "2026-02-09 14:52:59",
+    "email": "faith.njeri@test.com",
+    "first_name": "Faith",
+    "middle_name": null,
+    "last_name": "Njeri",
+    "phone": "254700000008",
+    "current_profession": "Nurse",
+    "experience_years": "3-4+ Years",
+    "has_business_exp": "No",
+    "financial_readiness_input": "I have adequate resources",
+    "location_county_input": "Uasin Gishu",
+    "location_status_input": "No, but I have found ideal locations",
+    "facility_meta": {},
+    "stage": "NO_FIT",
+    "fit_score": 0.0,
+    "fit_classification": "Unscored",
+    "priority_rank": 3,
+    "rejection_type": "Hard",
+    "wake_up_date": null,
+    "soft_rejection_reason": null,
+    "draft_message": "TO: faith.njeri@test.com\nCHANNEL: WhatsApp (+254700000008)\n\nDear Faith,\nBased on our current criteria regarding No Business Experience, we cannot proceed with your application at this time.",
+    "preferred_call_time": null,
+    "checklist_status": {},
+    "checklist_type": "KYC_Individual",
+    "financial_data": {
+      "statement_rows": [],
+      "abb_grid": {}
+    },
+    "financial_results": null,
+    "verified_financial_capital": null,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_assessment_data": {
+      "pre_visit_checklist": {
+        "photos_received": false,
+        "location_pin_received": false,
+        "not_too_remote": false,
+        "busy_area": false,
+        "ground_floor": false,
+        "building_state_good": false
+      },
+      "setting_type": "Urban",
+      "competition_clinics_1km": 0,
+      "competition_pharmacies_1km": 0,
+      "dist_nearest_public": 0.0,
+      "archetype_score": 1,
+      "building_sqft": 0.0,
+      "has_2_rooms": false,
+      "ventilated_well_lit": false,
+      "mobile_accessible": false,
+      "electricity_available": false,
+      "water_available": false,
+      "internet_possible": false,
+      "private_toilets": false,
+      "foot_traffic_count": 0
+    },
+    "site_assessment_results": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": "No Business Experience",
+    "activity_log": [
+      {
+        "timestamp": "2026-02-17 15:52:59.712637",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-17 15:52:59.712654",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Hard Rejection: No Business Experience",
+        "stage_snapshot": "NO_FIT"
+      }
+    ],
+    "stage_history": {
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-09T14:52:59",
+      "PipelineStage.NO_FIT": "2026-02-17T15:52:59.712658"
+    },
+    "last_contact_date": null,
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "kelvin.koinet@test.com",
+    "timestamp": "2026-02-08 10:52:59",
+    "email": "kelvin.koinet@test.com",
+    "first_name": "Kelvin",
+    "middle_name": null,
+    "last_name": "Koinet",
+    "phone": "254700000009",
+    "current_profession": "Medical Doctor",
+    "experience_years": "3-4+ Years",
+    "has_business_exp": "Yes",
+    "financial_readiness_input": "I have adequate resources",
+    "location_county_input": "Machakos",
+    "location_status_input": "No",
+    "facility_meta": {},
+    "stage": "NO_FIT",
+    "fit_score": 0.0,
+    "fit_classification": "Unscored",
+    "priority_rank": 3,
+    "rejection_type": "Hard",
+    "wake_up_date": null,
+    "soft_rejection_reason": null,
+    "draft_message": "TO: kelvin.koinet@test.com\nCHANNEL: WhatsApp (+254700000009)\n\nDear Kelvin,\nBased on our current criteria regarding Location 'Machakos' is outside operational areas, we cannot proceed with your application at this time.",
+    "preferred_call_time": null,
+    "checklist_status": {},
+    "checklist_type": "KYC_Individual",
+    "financial_data": {
+      "statement_rows": [],
+      "abb_grid": {}
+    },
+    "financial_results": null,
+    "verified_financial_capital": null,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_assessment_data": {
+      "pre_visit_checklist": {
+        "photos_received": false,
+        "location_pin_received": false,
+        "not_too_remote": false,
+        "busy_area": false,
+        "ground_floor": false,
+        "building_state_good": false
+      },
+      "setting_type": "Urban",
+      "competition_clinics_1km": 0,
+      "competition_pharmacies_1km": 0,
+      "dist_nearest_public": 0.0,
+      "archetype_score": 1,
+      "building_sqft": 0.0,
+      "has_2_rooms": false,
+      "ventilated_well_lit": false,
+      "mobile_accessible": false,
+      "electricity_available": false,
+      "water_available": false,
+      "internet_possible": false,
+      "private_toilets": false,
+      "foot_traffic_count": 0
+    },
+    "site_assessment_results": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": "Location 'Machakos' is outside operational areas",
+    "activity_log": [
+      {
+        "timestamp": "2026-02-17 15:52:59.713386",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-17 15:52:59.713402",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Hard Rejection: Location 'Machakos' is outside operational areas",
+        "stage_snapshot": "NO_FIT"
+      }
+    ],
+    "stage_history": {
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-08T10:52:59",
+      "PipelineStage.NO_FIT": "2026-02-17T15:52:59.713406"
+    },
+    "last_contact_date": null,
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "miriam.kilonzo@test.com",
+    "timestamp": "2026-02-07 13:52:59",
+    "email": "miriam.kilonzo@test.com",
+    "first_name": "Miriam",
+    "middle_name": null,
+    "last_name": "Kilonzo",
+    "phone": "254700000010",
     "current_profession": "Shopkeeper",
     "experience_years": "3-4+ Years",
     "has_business_exp": "Yes",
@@ -286,25 +797,23 @@
     "location_county_input": "Nairobi",
     "location_status_input": "Yes, I own or lease a location",
     "facility_meta": {},
-    "stage": "ASSESSMENT_PSYCH",
+    "stage": "NO_FIT",
     "fit_score": 0.16,
     "fit_classification": "Not A Fit",
     "priority_rank": 3,
     "rejection_type": "Hard",
     "wake_up_date": null,
     "soft_rejection_reason": null,
-    "draft_message": "TO: slow.sam@test.com\nCHANNEL: WhatsApp (+254700000000)\n\nDear Slow,\nBased on our current criteria regarding Low Score (Non-Specific), we cannot proceed with your application at this time.",
+    "draft_message": "TO: miriam.kilonzo@test.com\nCHANNEL: WhatsApp (+254700000010)\n\nDear Miriam,\nBased on our current criteria regarding Low Score (Non-Specific), we cannot proceed with your application at this time.",
     "preferred_call_time": null,
     "checklist_status": {},
     "checklist_type": "KYC_Individual",
     "financial_data": {
-      "statement_rows": [
-        {}
-      ],
+      "statement_rows": [],
       "abb_grid": {}
     },
     "financial_results": null,
-    "verified_financial_capital": 500000,
+    "verified_financial_capital": null,
     "psychometric_score": null,
     "interview_notes": null,
     "interview_date": null,
@@ -339,14 +848,14 @@
     "notes": "Low Score (Non-Specific)",
     "activity_log": [
       {
-        "timestamp": "2026-02-12 11:24:47.101254",
+        "timestamp": "2026-02-17 15:52:59.714189",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-02-12 11:24:47.101304",
+        "timestamp": "2026-02-17 15:52:59.714230",
         "author": "System",
         "type": "TRANSITION",
         "content": "Low Score. Hard Rejection.",
@@ -354,159 +863,44 @@
       }
     ],
     "stage_history": {
-      "EXPRESSED_INTEREST": "2026-01-07T00:00:00",
-      "FAQ_SENT": "2026-01-09T00:00:00",
-      "KYC_SCREENING": "2026-01-17T00:00:00",
-      "ASSESSMENT_PSYCH": "2026-02-16T00:00:00"
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-07T13:52:59",
+      "PipelineStage.NO_FIT": "2026-02-17T15:52:59.714234"
     },
     "last_contact_date": null,
     "last_contact_channel": null
   },
   {
-    "lead_id": "reject.ralph@test.com",
-    "timestamp": "2026-01-02 00:00:00",
-    "email": "reject.ralph@test.com",
-    "first_name": "Reject",
+    "lead_id": "daniel.kiptoo@test.com",
+    "timestamp": "2026-02-06 11:52:59",
+    "email": "daniel.kiptoo@test.com",
+    "first_name": "Daniel",
     "middle_name": null,
-    "last_name": "Ralph",
-    "phone": "254700000000",
-    "current_profession": "Other",
-    "experience_years": "3-4+ Years",
+    "last_name": "Kiptoo",
+    "phone": "254700000011",
+    "current_profession": "Clinical Officer",
+    "experience_years": "None",
     "has_business_exp": "Yes",
     "financial_readiness_input": "I have adequate resources",
-    "location_county_input": "Nairobi",
+    "location_county_input": "Nakuru",
     "location_status_input": "Yes, I own or lease a location",
     "facility_meta": {},
     "stage": "WARM_LEAD",
-    "fit_score": 0.17,
-    "fit_classification": "Fair/Conditional Fit",
-    "priority_rank": 1,
+    "fit_score": 0.16,
+    "fit_classification": "Not A Fit",
+    "priority_rank": 3,
     "rejection_type": "Soft",
-    "wake_up_date": "2026-05-17",
-    "soft_rejection_reason": "Avg Balance (ABB) too low: 40,000 < 54k (Limit)",
-    "draft_message": null,
+    "wake_up_date": "2027-02-17",
+    "soft_rejection_reason": "experience",
+    "draft_message": "TO: daniel.kiptoo@test.com\nCHANNEL: WhatsApp (+254700000011)\n\nDear Daniel,\nYour profile is promising! However, Curafa requires 3 years of clinical experience.\nWe have added you to our Talent Pool and will reach out in 12 months.",
     "preferred_call_time": null,
-    "checklist_status": {
-      "Application Form": true,
-      "Intro to AA Signed": true,
-      "National ID / Passport": true,
-      "KRA PIN": true,
-      "Good Conduct Cert": true,
-      "CRB Clearance": true,
-      "Bank Statements (6 Months)": true,
-      "Proof of Residence": true,
-      "CV / Experience Proof": true,
-      "Valid Clinical License": true
-    },
+    "checklist_status": {},
     "checklist_type": "KYC_Individual",
     "financial_data": {
-      "statement_rows": [
-        {
-          "date": "2025-01-01",
-          "credit_amount": 280000.0,
-          "include_deposit": true
-        },
-        {
-          "date": "2025-02-01",
-          "credit_amount": 290000.0,
-          "include_deposit": true
-        },
-        {
-          "date": "2025-03-01",
-          "credit_amount": 250000.0,
-          "include_deposit": true
-        },
-        {
-          "date": "2025-04-01",
-          "credit_amount": 300000.0,
-          "include_deposit": true
-        },
-        {
-          "date": "2025-05-01",
-          "credit_amount": 280000.0,
-          "include_deposit": true
-        }
-      ],
-      "abb_grid": {
-        "Month 1": {
-          "5th": 40000.0,
-          "10th": 40000.0,
-          "15th": 40000.0,
-          "20th": 40000.0,
-          "25th": 40000.0,
-          "30th": 40000.0
-        },
-        "Month 2": {
-          "5th": 40000.0,
-          "10th": 40000.0,
-          "15th": 40000.0,
-          "20th": 40000.0,
-          "25th": 40000.0,
-          "30th": 40000.0
-        },
-        "Month 3": {
-          "5th": 40000.0,
-          "10th": 40000.0,
-          "15th": 40000.0,
-          "20th": 40000.0,
-          "25th": 40000.0,
-          "30th": 40000.0
-        },
-        "Month 4": {
-          "5th": 40000.0,
-          "10th": 40000.0,
-          "15th": 40000.0,
-          "20th": 40000.0,
-          "25th": 40000.0,
-          "30th": 40000.0
-        },
-        "Month 5": {
-          "5th": 40000.0,
-          "10th": 40000.0,
-          "15th": 40000.0,
-          "20th": 40000.0,
-          "25th": 40000.0,
-          "30th": 40000.0
-        },
-        "Month 6": {
-          "5th": 40000.0,
-          "10th": 40000.0,
-          "15th": 40000.0,
-          "20th": 40000.0,
-          "25th": 40000.0,
-          "30th": 40000.0
-        }
-      }
+      "statement_rows": [],
+      "abb_grid": {}
     },
-    "financial_results": {
-      "start_date": "2025-01-01",
-      "end_date": "2025-05-01",
-      "num_months": 5,
-      "sum_deposits": 1400000.0,
-      "abd": 280000.0,
-      "checkpoint_averages": {
-        "5th": 40000.0,
-        "10th": 40000.0,
-        "15th": 40000.0,
-        "20th": 40000.0,
-        "25th": 40000.0,
-        "30th": 40000.0
-      },
-      "abb": 40000.0,
-      "total_revenue": 280000.0,
-      "net_income_amount": 140000.0,
-      "installment_capacity_amount": 70000.0,
-      "abd_status": "PASS",
-      "abb_status": "FAIL",
-      "overall_status": "FAIL",
-      "reason_codes": [
-        "ABB_BELOW_MIN"
-      ],
-      "revenue_pass": true,
-      "installment_pass": true,
-      "overall_pass": false
-    },
-    "verified_financial_capital": 280000.0,
+    "financial_results": null,
+    "verified_financial_capital": null,
     "psychometric_score": null,
     "interview_notes": null,
     "interview_date": null,
@@ -541,219 +935,494 @@
     "notes": null,
     "activity_log": [
       {
-        "timestamp": "2026-02-12 11:24:47.102361",
+        "timestamp": "2026-02-17 15:52:59.715064",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-02-12 11:24:47.102397",
+        "timestamp": "2026-02-17 15:52:59.715118",
         "author": "System",
         "type": "TRANSITION",
-        "content": "Vetting Passed. Rank 1 (Fair/Conditional Fit).",
-        "stage_snapshot": "POTENTIAL_FIT"
-      },
-      {
-        "timestamp": "2026-02-16 21:14:29.277493",
-        "author": "System",
-        "type": "EMAIL",
-        "content": "Message Approved & Sent.",
-        "stage_snapshot": "INTEREST_CHECK_SENT"
-      },
-      {
-        "timestamp": "2026-02-16 21:14:35.511972",
-        "author": "System",
-        "type": "ACTION",
-        "content": "Lead Replied YES. Sending FAQs.",
-        "stage_snapshot": "FAQ_SENT"
-      },
-      {
-        "timestamp": "2026-02-16 21:14:45.159755",
-        "author": "System",
-        "type": "EMAIL",
-        "content": "Message Approved & Sent.",
-        "stage_snapshot": "READY_FOR_CALL"
-      },
-      {
-        "timestamp": "2026-02-16 21:14:51.052465",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "Started Compliance (KYC_Individual).",
-        "stage_snapshot": "KYC_SCREENING"
-      },
-      {
-        "timestamp": "2026-02-16 21:15:14.140132",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "All Docs Received. Moved to Financial Assessment.",
-        "stage_snapshot": "FINANCIAL_ASSESSMENT"
-      },
-      {
-        "timestamp": "2026-02-16 21:18:09.773251",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "Financials FAILED. Reason: Avg Balance (ABB) too low: 40,000 < 54k (Limit). Moved to Warm Leads.",
+        "content": "Soft Rejection (experience). Moved to Warm Leads.",
         "stage_snapshot": "WARM_LEAD"
       }
     ],
     "stage_history": {
-      "EXPRESSED_INTEREST": "2026-01-02T00:00:00",
-      "PipelineStage.INTEREST_CHECK_SENT": "2026-02-16T21:14:29.277502",
-      "PipelineStage.FAQ_SENT": "2026-02-16T21:14:35.511984",
-      "PipelineStage.READY_FOR_CALL": "2026-02-16T21:14:45.159763",
-      "PipelineStage.KYC_SCREENING": "2026-02-16T21:14:51.052478",
-      "PipelineStage.FINANCIAL_ASSESSMENT": "2026-02-16T21:15:14.140143",
-      "PipelineStage.WARM_LEAD": "2026-02-16T21:18:09.773260"
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-06T11:52:59",
+      "PipelineStage.WARM_LEAD": "2026-02-17T15:52:59.715123"
     },
-    "last_contact_date": "2026-02-16 21:14:45",
+    "last_contact_date": null,
     "last_contact_channel": null
   },
   {
-    "lead_id": "john@test.com",
-    "timestamp": "2026-02-16 21:06:22",
-    "email": "john@test.com",
-    "first_name": "John",
+    "lead_id": "ruth.keya@test.com",
+    "timestamp": "2026-02-05 13:52:59",
+    "email": "ruth.keya@test.com",
+    "first_name": "Ruth",
     "middle_name": null,
-    "last_name": "Kamau",
-    "phone": "254700000000",
+    "last_name": "Keya",
+    "phone": "254700000012",
+    "current_profession": "Nurse",
+    "experience_years": "1-2 Years",
+    "has_business_exp": "Yes",
+    "financial_readiness_input": "I need a loan",
+    "location_county_input": "Kiambu",
+    "location_status_input": "Yes, I own or lease a location",
+    "facility_meta": {},
+    "stage": "POTENTIAL_FIT",
+    "fit_score": 0.17,
+    "fit_classification": "Fair/Conditional Fit",
+    "priority_rank": 1,
+    "rejection_type": null,
+    "wake_up_date": null,
+    "soft_rejection_reason": null,
+    "draft_message": "TO: ruth.keya@test.com\nCHANNEL: WhatsApp (+254700000012)\n\nHabari Ruth,\nYour application stood out\u2014especially since you have a location ready in Kiambu.\nWe are fast-tracking site owners. Are you available for a brief chat this week?",
+    "preferred_call_time": null,
+    "checklist_status": {},
+    "checklist_type": "KYC_Individual",
+    "financial_data": {
+      "statement_rows": [],
+      "abb_grid": {}
+    },
+    "financial_results": null,
+    "verified_financial_capital": null,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_assessment_data": {
+      "pre_visit_checklist": {
+        "photos_received": false,
+        "location_pin_received": false,
+        "not_too_remote": false,
+        "busy_area": false,
+        "ground_floor": false,
+        "building_state_good": false
+      },
+      "setting_type": "Urban",
+      "competition_clinics_1km": 0,
+      "competition_pharmacies_1km": 0,
+      "dist_nearest_public": 0.0,
+      "archetype_score": 1,
+      "building_sqft": 0.0,
+      "has_2_rooms": false,
+      "ventilated_well_lit": false,
+      "mobile_accessible": false,
+      "electricity_available": false,
+      "water_available": false,
+      "internet_possible": false,
+      "private_toilets": false,
+      "foot_traffic_count": 0
+    },
+    "site_assessment_results": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": null,
+    "activity_log": [
+      {
+        "timestamp": "2026-02-17 15:52:59.716318",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-17 15:52:59.716372",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Vetting Passed. Rank 1 (Fair/Conditional Fit).",
+        "stage_snapshot": "POTENTIAL_FIT"
+      }
+    ],
+    "stage_history": {
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-05T13:52:59",
+      "PipelineStage.POTENTIAL_FIT": "2026-02-17T15:52:59.716377"
+    },
+    "last_contact_date": null,
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "hassan.abdi@test.com",
+    "timestamp": "2026-02-04 09:52:59",
+    "email": "hassan.abdi@test.com",
+    "first_name": "Hassan",
+    "middle_name": null,
+    "last_name": "Abdi",
+    "phone": "254700000013",
+    "current_profession": "Medical Doctor",
+    "experience_years": "1-2 Years",
+    "has_business_exp": "No",
+    "financial_readiness_input": "I have adequate resources",
+    "location_county_input": "Garissa",
+    "location_status_input": "No, but I have found ideal locations",
+    "facility_meta": {},
+    "stage": "NO_FIT",
+    "fit_score": 0.0,
+    "fit_classification": "Unscored",
+    "priority_rank": 3,
+    "rejection_type": "Hard",
+    "wake_up_date": null,
+    "soft_rejection_reason": null,
+    "draft_message": "TO: hassan.abdi@test.com\nCHANNEL: WhatsApp (+254700000013)\n\nDear Hassan,\nBased on our current criteria regarding No Business Experience, we cannot proceed with your application at this time.",
+    "preferred_call_time": null,
+    "checklist_status": {},
+    "checklist_type": "KYC_Individual",
+    "financial_data": {
+      "statement_rows": [],
+      "abb_grid": {}
+    },
+    "financial_results": null,
+    "verified_financial_capital": null,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_assessment_data": {
+      "pre_visit_checklist": {
+        "photos_received": false,
+        "location_pin_received": false,
+        "not_too_remote": false,
+        "busy_area": false,
+        "ground_floor": false,
+        "building_state_good": false
+      },
+      "setting_type": "Urban",
+      "competition_clinics_1km": 0,
+      "competition_pharmacies_1km": 0,
+      "dist_nearest_public": 0.0,
+      "archetype_score": 1,
+      "building_sqft": 0.0,
+      "has_2_rooms": false,
+      "ventilated_well_lit": false,
+      "mobile_accessible": false,
+      "electricity_available": false,
+      "water_available": false,
+      "internet_possible": false,
+      "private_toilets": false,
+      "foot_traffic_count": 0
+    },
+    "site_assessment_results": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": "No Business Experience",
+    "activity_log": [
+      {
+        "timestamp": "2026-02-17 15:52:59.717450",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-17 15:52:59.717467",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Hard Rejection: No Business Experience",
+        "stage_snapshot": "NO_FIT"
+      }
+    ],
+    "stage_history": {
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-04T09:52:59",
+      "PipelineStage.NO_FIT": "2026-02-17T15:52:59.717471"
+    },
+    "last_contact_date": null,
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "irene.mwangi@test.com",
+    "timestamp": "2026-02-03 14:52:59",
+    "email": "irene.mwangi@test.com",
+    "first_name": "Irene",
+    "middle_name": null,
+    "last_name": "Mwangi",
+    "phone": "254700000014",
+    "current_profession": "Shopkeeper",
+    "experience_years": "None",
+    "has_business_exp": "Yes",
+    "financial_readiness_input": "I need a loan",
+    "location_county_input": "Mombasa",
+    "location_status_input": "No, but I have found ideal locations",
+    "facility_meta": {},
+    "stage": "WARM_LEAD",
+    "fit_score": 0.12,
+    "fit_classification": "Not A Fit",
+    "priority_rank": 3,
+    "rejection_type": "Soft",
+    "wake_up_date": "2027-02-17",
+    "soft_rejection_reason": "experience",
+    "draft_message": "TO: irene.mwangi@test.com\nCHANNEL: WhatsApp (+254700000014)\n\nDear Irene,\nYour profile is promising! However, Curafa requires 3 years of clinical experience.\nWe have added you to our Talent Pool and will reach out in 12 months.",
+    "preferred_call_time": null,
+    "checklist_status": {},
+    "checklist_type": "KYC_Individual",
+    "financial_data": {
+      "statement_rows": [],
+      "abb_grid": {}
+    },
+    "financial_results": null,
+    "verified_financial_capital": null,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_assessment_data": {
+      "pre_visit_checklist": {
+        "photos_received": false,
+        "location_pin_received": false,
+        "not_too_remote": false,
+        "busy_area": false,
+        "ground_floor": false,
+        "building_state_good": false
+      },
+      "setting_type": "Urban",
+      "competition_clinics_1km": 0,
+      "competition_pharmacies_1km": 0,
+      "dist_nearest_public": 0.0,
+      "archetype_score": 1,
+      "building_sqft": 0.0,
+      "has_2_rooms": false,
+      "ventilated_well_lit": false,
+      "mobile_accessible": false,
+      "electricity_available": false,
+      "water_available": false,
+      "internet_possible": false,
+      "private_toilets": false,
+      "foot_traffic_count": 0
+    },
+    "site_assessment_results": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": null,
+    "activity_log": [
+      {
+        "timestamp": "2026-02-17 15:52:59.718578",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-17 15:52:59.718630",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Soft Rejection (experience). Moved to Warm Leads.",
+        "stage_snapshot": "WARM_LEAD"
+      }
+    ],
+    "stage_history": {
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-03T14:52:59",
+      "PipelineStage.WARM_LEAD": "2026-02-17T15:52:59.718635"
+    },
+    "last_contact_date": null,
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "samuel.mule@test.com",
+    "timestamp": "2026-02-02 12:52:59",
+    "email": "samuel.mule@test.com",
+    "first_name": "Samuel",
+    "middle_name": null,
+    "last_name": "Mule",
+    "phone": "254700000015",
     "current_profession": "Clinical Officer",
     "experience_years": "3-4+ Years",
-    "has_business_exp": "Yes",
+    "has_business_exp": "No",
+    "financial_readiness_input": "I need a loan",
+    "location_county_input": "Nyeri",
+    "location_status_input": "Yes, I own or lease a location",
+    "facility_meta": {},
+    "stage": "NO_FIT",
+    "fit_score": 0.0,
+    "fit_classification": "Unscored",
+    "priority_rank": 3,
+    "rejection_type": "Hard",
+    "wake_up_date": null,
+    "soft_rejection_reason": null,
+    "draft_message": "TO: samuel.mule@test.com\nCHANNEL: WhatsApp (+254700000015)\n\nDear Samuel,\nBased on our current criteria regarding No Business Experience, we cannot proceed with your application at this time.",
+    "preferred_call_time": null,
+    "checklist_status": {},
+    "checklist_type": "KYC_Individual",
+    "financial_data": {
+      "statement_rows": [],
+      "abb_grid": {}
+    },
+    "financial_results": null,
+    "verified_financial_capital": null,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_assessment_data": {
+      "pre_visit_checklist": {
+        "photos_received": false,
+        "location_pin_received": false,
+        "not_too_remote": false,
+        "busy_area": false,
+        "ground_floor": false,
+        "building_state_good": false
+      },
+      "setting_type": "Urban",
+      "competition_clinics_1km": 0,
+      "competition_pharmacies_1km": 0,
+      "dist_nearest_public": 0.0,
+      "archetype_score": 1,
+      "building_sqft": 0.0,
+      "has_2_rooms": false,
+      "ventilated_well_lit": false,
+      "mobile_accessible": false,
+      "electricity_available": false,
+      "water_available": false,
+      "internet_possible": false,
+      "private_toilets": false,
+      "foot_traffic_count": 0
+    },
+    "site_assessment_results": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": "No Business Experience",
+    "activity_log": [
+      {
+        "timestamp": "2026-02-17 15:52:59.719771",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-17 15:52:59.719786",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Hard Rejection: No Business Experience",
+        "stage_snapshot": "NO_FIT"
+      }
+    ],
+    "stage_history": {
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-02T12:52:59",
+      "PipelineStage.NO_FIT": "2026-02-17T15:52:59.719789"
+    },
+    "last_contact_date": null,
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "agnes.maisha@test.com",
+    "timestamp": "2026-02-01 13:52:59",
+    "email": "agnes.maisha@test.com",
+    "first_name": "Agnes",
+    "middle_name": null,
+    "last_name": "Maisha",
+    "phone": "254700000016",
+    "current_profession": "Nurse",
+    "experience_years": "None",
+    "has_business_exp": "No",
     "financial_readiness_input": "I have adequate resources",
+    "location_county_input": "Kakamega",
+    "location_status_input": "No",
+    "facility_meta": {},
+    "stage": "NO_FIT",
+    "fit_score": 0.0,
+    "fit_classification": "Unscored",
+    "priority_rank": 3,
+    "rejection_type": "Hard",
+    "wake_up_date": null,
+    "soft_rejection_reason": null,
+    "draft_message": "TO: agnes.maisha@test.com\nCHANNEL: WhatsApp (+254700000016)\n\nDear Agnes,\nBased on our current criteria regarding No Business Experience, we cannot proceed with your application at this time.",
+    "preferred_call_time": null,
+    "checklist_status": {},
+    "checklist_type": "KYC_Individual",
+    "financial_data": {
+      "statement_rows": [],
+      "abb_grid": {}
+    },
+    "financial_results": null,
+    "verified_financial_capital": null,
+    "psychometric_score": null,
+    "interview_notes": null,
+    "interview_date": null,
+    "site_assessment_data": {
+      "pre_visit_checklist": {
+        "photos_received": false,
+        "location_pin_received": false,
+        "not_too_remote": false,
+        "busy_area": false,
+        "ground_floor": false,
+        "building_state_good": false
+      },
+      "setting_type": "Urban",
+      "competition_clinics_1km": 0,
+      "competition_pharmacies_1km": 0,
+      "dist_nearest_public": 0.0,
+      "archetype_score": 1,
+      "building_sqft": 0.0,
+      "has_2_rooms": false,
+      "ventilated_well_lit": false,
+      "mobile_accessible": false,
+      "electricity_available": false,
+      "water_available": false,
+      "internet_possible": false,
+      "private_toilets": false,
+      "foot_traffic_count": 0
+    },
+    "site_assessment_results": null,
+    "site_visit_score": null,
+    "site_location_details": null,
+    "contract_generated_date": null,
+    "notes": "No Business Experience",
+    "activity_log": [
+      {
+        "timestamp": "2026-02-17 15:52:59.720965",
+        "author": "System",
+        "type": "SYSTEM",
+        "content": "Lead captured via Google Form.",
+        "stage_snapshot": "EXPRESSED_INTEREST"
+      },
+      {
+        "timestamp": "2026-02-17 15:52:59.720980",
+        "author": "System",
+        "type": "TRANSITION",
+        "content": "Hard Rejection: No Business Experience",
+        "stage_snapshot": "NO_FIT"
+      }
+    ],
+    "stage_history": {
+      "PipelineStage.EXPRESSED_INTEREST": "2026-02-01T13:52:59",
+      "PipelineStage.NO_FIT": "2026-02-17T15:52:59.720983"
+    },
+    "last_contact_date": null,
+    "last_contact_channel": null
+  },
+  {
+    "lead_id": "victor.gaati@test.com",
+    "timestamp": "2026-01-31 10:52:59",
+    "email": "victor.gaati@test.com",
+    "first_name": "Victor",
+    "middle_name": null,
+    "last_name": "Gaati",
+    "phone": "254700000017",
+    "current_profession": "Medical Doctor",
+    "experience_years": "3-4+ Years",
+    "has_business_exp": "Yes",
+    "financial_readiness_input": "I need a loan",
     "location_county_input": "Nairobi",
     "location_status_input": "Yes, I own or lease a location",
     "facility_meta": {},
-    "stage": "ASSESSMENT_INTERVIEW",
+    "stage": "POTENTIAL_FIT",
     "fit_score": 0.2,
     "fit_classification": "Ideal Fit",
     "priority_rank": 1,
     "rejection_type": null,
     "wake_up_date": null,
     "soft_rejection_reason": null,
-    "draft_message": null,
+    "draft_message": "TO: victor.gaati@test.com\nCHANNEL: WhatsApp (+254700000017)\n\nHabari Victor,\nYour application stood out\u2014especially since you have a location ready in Nairobi.\nWe are fast-tracking site owners. Are you available for a brief chat this week?",
     "preferred_call_time": null,
-    "checklist_status": {
-      "Application Form": true,
-      "Intro to AA Signed": true,
-      "National ID / Passport": true,
-      "KRA PIN": true,
-      "Good Conduct Cert": true,
-      "CRB Clearance": true,
-      "Bank Statements (6 Months)": true,
-      "Proof of Residence": true,
-      "CV / Experience Proof": true,
-      "Valid Clinical License": true
-    },
+    "checklist_status": {},
     "checklist_type": "KYC_Individual",
     "financial_data": {
-      "statement_rows": [
-        {
-          "date": "2025-01-01",
-          "credit_amount": 280000.0,
-          "include_deposit": true
-        },
-        {
-          "date": "2025-02-01",
-          "credit_amount": 280000.0,
-          "include_deposit": true
-        },
-        {
-          "date": "2025-03-01",
-          "credit_amount": 200000.0,
-          "include_deposit": true
-        },
-        {
-          "date": "2025-04-01",
-          "credit_amount": 300000.0,
-          "include_deposit": true
-        },
-        {
-          "date": "2025-05-01",
-          "credit_amount": 280000.0,
-          "include_deposit": true
-        }
-      ],
-      "abb_grid": {
-        "Month 1": {
-          "5th": 56000.0,
-          "10th": 56000.0,
-          "15th": 56000.0,
-          "20th": 56000.0,
-          "25th": 56000.0,
-          "30th": 56000.0
-        },
-        "Month 2": {
-          "5th": 56000.0,
-          "10th": 56000.0,
-          "15th": 56000.0,
-          "20th": 56000.0,
-          "25th": 56000.0,
-          "30th": 56000.0
-        },
-        "Month 3": {
-          "5th": 56000.0,
-          "10th": 56000.0,
-          "15th": 56000.0,
-          "20th": 56000.0,
-          "25th": 56000.0,
-          "30th": 56000.0
-        },
-        "Month 4": {
-          "5th": 56000.0,
-          "10th": 56000.0,
-          "15th": 56000.0,
-          "20th": 56000.0,
-          "25th": 56000.0,
-          "30th": 56000.0
-        },
-        "Month 5": {
-          "5th": 56000.0,
-          "10th": 56000.0,
-          "15th": 56000.0,
-          "20th": 56000.0,
-          "25th": 56000.0,
-          "30th": 56000.0
-        },
-        "Month 6": {
-          "5th": 56000.0,
-          "10th": 56000.0,
-          "15th": 56000.0,
-          "20th": 56000.0,
-          "25th": 56000.0,
-          "30th": 56000.0
-        }
-      }
+      "statement_rows": [],
+      "abb_grid": {}
     },
-    "financial_results": {
-      "start_date": "2025-01-01",
-      "end_date": "2025-05-01",
-      "num_months": 5,
-      "sum_deposits": 1340000.0,
-      "abd": 268000.0,
-      "checkpoint_averages": {
-        "5th": 56000.0,
-        "10th": 56000.0,
-        "15th": 56000.0,
-        "20th": 56000.0,
-        "25th": 56000.0,
-        "30th": 56000.0
-      },
-      "abb": 56000.0,
-      "total_revenue": 268000.0,
-      "net_income_amount": 134000.0,
-      "installment_capacity_amount": 67000.0,
-      "abd_status": "PASS",
-      "abb_status": "BORDERLINE_PASS",
-      "overall_status": "PASS_WITH_MARGIN",
-      "reason_codes": [
-        "ABB_WITHIN_TOLERANCE"
-      ],
-      "revenue_pass": true,
-      "installment_pass": true,
-      "overall_pass": true
-    },
-    "verified_financial_capital": 268000.0,
+    "financial_results": null,
+    "verified_financial_capital": null,
     "psychometric_score": null,
     "interview_notes": null,
     "interview_date": null,
@@ -788,215 +1457,59 @@
     "notes": null,
     "activity_log": [
       {
-        "timestamp": "2026-02-16 21:06:22.556535",
+        "timestamp": "2026-02-17 15:52:59.722235",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-02-16 21:06:22.556667",
+        "timestamp": "2026-02-17 15:52:59.722271",
         "author": "System",
         "type": "TRANSITION",
         "content": "Vetting Passed. Rank 1 (Ideal Fit).",
         "stage_snapshot": "POTENTIAL_FIT"
-      },
-      {
-        "timestamp": "2026-02-16 21:06:55.842708",
-        "author": "System",
-        "type": "EMAIL",
-        "content": "Message Approved & Sent.",
-        "stage_snapshot": "INTEREST_CHECK_SENT"
-      },
-      {
-        "timestamp": "2026-02-16 21:07:09.946083",
-        "author": "System",
-        "type": "ACTION",
-        "content": "Lead Replied YES. Sending FAQs.",
-        "stage_snapshot": "FAQ_SENT"
-      },
-      {
-        "timestamp": "2026-02-16 21:07:34.082843",
-        "author": "System",
-        "type": "EMAIL",
-        "content": "Message Approved & Sent.",
-        "stage_snapshot": "READY_FOR_CALL"
-      },
-      {
-        "timestamp": "2026-02-16 21:07:39.801666",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "Started Compliance (KYC_Individual).",
-        "stage_snapshot": "KYC_SCREENING"
-      },
-      {
-        "timestamp": "2026-02-16 21:08:03.609985",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "All Docs Received. Moved to Financial Assessment.",
-        "stage_snapshot": "FINANCIAL_ASSESSMENT"
-      },
-      {
-        "timestamp": "2026-02-16 21:13:12.311127",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "Financials PASSED (Within 10% Margin). Rev: 268,000, ABB: 56,000. Moved to Psychometric Assessment.",
-        "stage_snapshot": "ASSESSMENT_PSYCH"
       }
     ],
     "stage_history": {
-      "PipelineStage.EXPRESSED_INTEREST": "2026-02-16T21:06:22",
-      "PipelineStage.POTENTIAL_FIT": "2026-02-16T21:06:22.556674",
-      "PipelineStage.INTEREST_CHECK_SENT": "2026-02-16T21:06:55.842717",
-      "PipelineStage.FAQ_SENT": "2026-02-16T21:07:09.946096",
-      "PipelineStage.READY_FOR_CALL": "2026-02-16T21:07:34.082852",
-      "PipelineStage.KYC_SCREENING": "2026-02-16T21:07:39.801678",
-      "PipelineStage.FINANCIAL_ASSESSMENT": "2026-02-16T21:08:03.609998",
-      "PipelineStage.ASSESSMENT_PSYCH": "2026-02-16T21:13:12.311137"
+      "PipelineStage.EXPRESSED_INTEREST": "2026-01-31T10:52:59",
+      "PipelineStage.POTENTIAL_FIT": "2026-02-17T15:52:59.722275"
     },
-    "last_contact_date": "2026-02-16 21:07:34",
+    "last_contact_date": null,
     "last_contact_channel": null
   },
   {
-    "lead_id": "mary@test.com",
-    "timestamp": "2026-02-16 21:09:29",
-    "email": "mary@test.com",
-    "first_name": "Mary",
+    "lead_id": "winnie.neeris@test.com",
+    "timestamp": "2026-01-30 13:52:59",
+    "email": "winnie.neeris@test.com",
+    "first_name": "Winnie",
     "middle_name": null,
-    "last_name": "Otieno",
-    "phone": "254700000000",
-    "current_profession": "Nurse",
-    "experience_years": "3-4+ Years",
-    "has_business_exp": "Yes",
+    "last_name": "Neeris",
+    "phone": "254700000018",
+    "current_profession": "Clinical Officer",
+    "experience_years": "1-2 Years",
+    "has_business_exp": "No",
     "financial_readiness_input": "I have adequate resources",
-    "location_county_input": "Nairobi",
+    "location_county_input": "Kajiado",
     "location_status_input": "Yes, I own or lease a location",
     "facility_meta": {},
-    "stage": "WARM_LEAD",
-    "fit_score": 0.19,
-    "fit_classification": "Good Fit",
-    "priority_rank": 1,
-    "rejection_type": "Soft",
-    "wake_up_date": "2026-05-17",
-    "soft_rejection_reason": "Avg Balance (ABB) too low: 3,111 < 54k (Limit)",
-    "draft_message": null,
+    "stage": "NO_FIT",
+    "fit_score": 0.0,
+    "fit_classification": "Unscored",
+    "priority_rank": 3,
+    "rejection_type": "Hard",
+    "wake_up_date": null,
+    "soft_rejection_reason": null,
+    "draft_message": "TO: winnie.neeris@test.com\nCHANNEL: WhatsApp (+254700000018)\n\nDear Winnie,\nBased on our current criteria regarding No Business Experience, we cannot proceed with your application at this time.",
     "preferred_call_time": null,
-    "checklist_status": {
-      "Application Form": true,
-      "Intro to AA Signed": true,
-      "National ID / Passport": true,
-      "KRA PIN": true,
-      "Good Conduct Cert": true,
-      "CRB Clearance": true,
-      "Bank Statements (6 Months)": true,
-      "Proof of Residence": true,
-      "CV / Experience Proof": true,
-      "Valid Clinical License": true
-    },
+    "checklist_status": {},
     "checklist_type": "KYC_Individual",
     "financial_data": {
-      "statement_rows": [
-        {
-          "date": "2025-01-01",
-          "credit_amount": 280000.0,
-          "include_deposit": true
-        },
-        {
-          "date": "2025-02-01",
-          "credit_amount": 290000.0,
-          "include_deposit": true
-        },
-        {
-          "date": "2025-03-01",
-          "credit_amount": 250000.0,
-          "include_deposit": true
-        },
-        {
-          "date": "2025-04-01",
-          "credit_amount": 280000.0,
-          "include_deposit": true
-        }
-      ],
-      "abb_grid": {
-        "Month 1": {
-          "5th": 56000.0,
-          "10th": 0.0,
-          "15th": 0.0,
-          "20th": 56000.0,
-          "25th": 0.0,
-          "30th": 0.0
-        },
-        "Month 2": {
-          "5th": 0.0,
-          "10th": 0.0,
-          "15th": 0.0,
-          "20th": 0.0,
-          "25th": 0.0,
-          "30th": 0.0
-        },
-        "Month 3": {
-          "5th": 0.0,
-          "10th": 0.0,
-          "15th": 0.0,
-          "20th": 0.0,
-          "25th": 0.0,
-          "30th": 0.0
-        },
-        "Month 4": {
-          "5th": 0.0,
-          "10th": 0.0,
-          "15th": 0.0,
-          "20th": 0.0,
-          "25th": 0.0,
-          "30th": 0.0
-        },
-        "Month 5": {
-          "5th": 0.0,
-          "10th": 0.0,
-          "15th": 0.0,
-          "20th": 0.0,
-          "25th": 0.0,
-          "30th": 0.0
-        },
-        "Month 6": {
-          "5th": 0.0,
-          "10th": 0.0,
-          "15th": 0.0,
-          "20th": 0.0,
-          "25th": 0.0,
-          "30th": 0.0
-        }
-      }
+      "statement_rows": [],
+      "abb_grid": {}
     },
-    "financial_results": {
-      "start_date": "2025-01-01",
-      "end_date": "2025-04-01",
-      "num_months": 4,
-      "sum_deposits": 1100000.0,
-      "abd": 275000.0,
-      "checkpoint_averages": {
-        "5th": 9333.333333333334,
-        "10th": 0.0,
-        "15th": 0.0,
-        "20th": 9333.333333333334,
-        "25th": 0.0,
-        "30th": 0.0
-      },
-      "abb": 3111.1111111111113,
-      "total_revenue": 275000.0,
-      "net_income_amount": 137500.0,
-      "installment_capacity_amount": 68750.0,
-      "abd_status": "PASS",
-      "abb_status": "FAIL",
-      "overall_status": "FAIL",
-      "reason_codes": [
-        "ABB_BELOW_MIN"
-      ],
-      "revenue_pass": true,
-      "installment_pass": true,
-      "overall_pass": false
-    },
-    "verified_financial_capital": 275000.0,
+    "financial_results": null,
+    "verified_financial_capital": null,
     "psychometric_score": null,
     "interview_notes": null,
     "interview_date": null,
@@ -1028,125 +1541,28 @@
     "site_visit_score": null,
     "site_location_details": null,
     "contract_generated_date": null,
-    "notes": null,
+    "notes": "No Business Experience",
     "activity_log": [
       {
-        "timestamp": "2026-02-16 21:09:29.401843",
+        "timestamp": "2026-02-17 15:52:59.723588",
         "author": "System",
         "type": "SYSTEM",
         "content": "Lead captured via Google Form.",
         "stage_snapshot": "EXPRESSED_INTEREST"
       },
       {
-        "timestamp": "2026-02-16 21:09:29.401934",
+        "timestamp": "2026-02-17 15:52:59.723603",
         "author": "System",
         "type": "TRANSITION",
-        "content": "Vetting Passed. Rank 1 (Good Fit).",
-        "stage_snapshot": "POTENTIAL_FIT"
-      },
-      {
-        "timestamp": "2026-02-16 22:50:03.709145",
-        "author": "System",
-        "type": "EMAIL",
-        "content": "Message Approved & Sent.",
-        "stage_snapshot": "INTEREST_CHECK_SENT"
-      },
-      {
-        "timestamp": "2026-02-16 22:50:09.295967",
-        "author": "System",
-        "type": "ACTION",
-        "content": "Lead Replied YES. Sending FAQs.",
-        "stage_snapshot": "FAQ_SENT"
-      },
-      {
-        "timestamp": "2026-02-16 22:50:14.028318",
-        "author": "System",
-        "type": "EMAIL",
-        "content": "Message Approved & Sent.",
-        "stage_snapshot": "READY_FOR_CALL"
-      },
-      {
-        "timestamp": "2026-02-16 22:50:19.245503",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "Started Compliance (KYC_Individual).",
-        "stage_snapshot": "KYC_SCREENING"
-      },
-      {
-        "timestamp": "2026-02-16 22:50:42.264139",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "All Docs Received. Moved to Financial Assessment.",
-        "stage_snapshot": "FINANCIAL_ASSESSMENT"
-      },
-      {
-        "timestamp": "2026-02-16 22:58:18.180857",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "Financials FAILED. Reason: Avg Balance (ABB) too low: 0 < 54k (Limit). Moved to Warm Leads.",
-        "stage_snapshot": "WARM_LEAD"
-      },
-      {
-        "timestamp": "2026-02-16 23:05:13.115533",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "Lead Reactivated from Warm Pool. Draft Regenerated.",
-        "stage_snapshot": "POTENTIAL_FIT"
-      },
-      {
-        "timestamp": "2026-02-16 23:05:24.809429",
-        "author": "System",
-        "type": "EMAIL",
-        "content": "Message Approved & Sent.",
-        "stage_snapshot": "INTEREST_CHECK_SENT"
-      },
-      {
-        "timestamp": "2026-02-16 23:05:29.520406",
-        "author": "System",
-        "type": "ACTION",
-        "content": "Lead Replied YES. Sending FAQs.",
-        "stage_snapshot": "FAQ_SENT"
-      },
-      {
-        "timestamp": "2026-02-16 23:05:33.838245",
-        "author": "System",
-        "type": "EMAIL",
-        "content": "Message Approved & Sent.",
-        "stage_snapshot": "READY_FOR_CALL"
-      },
-      {
-        "timestamp": "2026-02-16 23:05:38.652809",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "Started Compliance (KYC_Individual).",
-        "stage_snapshot": "KYC_SCREENING"
-      },
-      {
-        "timestamp": "2026-02-16 23:05:55.323622",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "All Docs Received. Moved to Financial Assessment.",
-        "stage_snapshot": "FINANCIAL_ASSESSMENT"
-      },
-      {
-        "timestamp": "2026-02-16 23:07:32.701018",
-        "author": "System",
-        "type": "TRANSITION",
-        "content": "Financials FAILED. Reason: Avg Balance (ABB) too low: 3,111 < 54k (Limit). Moved to Warm Leads.",
-        "stage_snapshot": "WARM_LEAD"
+        "content": "Hard Rejection: No Business Experience",
+        "stage_snapshot": "NO_FIT"
       }
     ],
     "stage_history": {
-      "PipelineStage.EXPRESSED_INTEREST": "2026-02-16T21:09:29",
-      "PipelineStage.POTENTIAL_FIT": "2026-02-16T21:09:29.401941",
-      "PipelineStage.INTEREST_CHECK_SENT": "2026-02-16T22:50:03.709156",
-      "PipelineStage.FAQ_SENT": "2026-02-16T22:50:09.295981",
-      "PipelineStage.READY_FOR_CALL": "2026-02-16T22:50:14.028326",
-      "PipelineStage.KYC_SCREENING": "2026-02-16T22:50:19.245514",
-      "PipelineStage.FINANCIAL_ASSESSMENT": "2026-02-16T22:50:42.264153",
-      "PipelineStage.WARM_LEAD": "2026-02-16T22:58:18.180868"
+      "PipelineStage.EXPRESSED_INTEREST": "2026-01-30T13:52:59",
+      "PipelineStage.NO_FIT": "2026-02-17T15:52:59.723606"
     },
-    "last_contact_date": "2026-02-16 23:05:33",
+    "last_contact_date": null,
     "last_contact_channel": null
   }
 ]
