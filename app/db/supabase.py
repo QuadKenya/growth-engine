@@ -16,12 +16,11 @@ class DatabaseClient:
         # Try loading from Streamlit secrets (Cloud Mode) safely
         if not url:
             try:
-                # This checks if the key exists without crashing if secrets.toml is missing
                 if "SUPABASE_URL" in st.secrets:
                     url = st.secrets["SUPABASE_URL"]
                     key = st.secrets["SUPABASE_KEY"]
+                    print("🔍 Found credentials in Streamlit Secrets.")
             except Exception:
-                # Secrets file not found, ignore and use local mode
                 pass
 
         # If credentials exist and point to a real Supabase instance
@@ -29,7 +28,7 @@ class DatabaseClient:
             try:
                 self.client = create_client(url, key)
                 self.use_cloud = True
-                print("✅ Connected to Supabase Cloud")
+                print(f"✅ Connected to Supabase Cloud: {url}")
             except Exception as e:
                 print(f"⚠️ Failed to connect to Supabase: {e}. Falling back to local JSON.")
         
@@ -50,7 +49,9 @@ class DatabaseClient:
 
     # --- LEAD METHODS ---
     def upsert_lead(self, lead: Lead) -> Lead:
-        lead_dict = lead.dict()
+        # FIXED: Use model_dump(mode='json') to serialize datetime objects to strings
+        lead_dict = lead.model_dump(mode='json')
+        
         if self.use_cloud:
             payload = {"id": lead.lead_id, "data": lead_dict}
             self.client.table("leads").upsert(payload).execute()
@@ -83,9 +84,8 @@ class DatabaseClient:
 
     # --- COHORT METHODS ---
     def upsert_cohort(self, cohort: Cohort) -> Cohort:
-        c_dict = cohort.dict()
-        c_dict['start_date'] = c_dict['start_date'].isoformat()
-        c_dict['end_date'] = c_dict['end_date'].isoformat()
+        # FIXED: Use model_dump(mode='json') here as well
+        c_dict = cohort.model_dump(mode='json')
         
         if self.use_cloud:
             payload = {"name": cohort.name, "data": c_dict}
@@ -117,8 +117,6 @@ class DatabaseClient:
     def reset_db(self):
         """Safely clears the database."""
         if self.use_cloud:
-            # Dangerous in cloud, usually we skip this or require admin rights
-            # For this MVP, we won't implement cloud wipe to prevent accidents
             print("⚠️ Reset DB ignored in Cloud Mode.")
         else:
             self._write_json(self.LEAD_PATH, [])

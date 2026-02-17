@@ -616,28 +616,32 @@ with st.sidebar:
             county = st.selectbox("County", ["Nairobi", "Mombasa", "Kiambu", "Marsabit"])
             loc = st.selectbox("Location", ["Yes, I own or lease a location", "No, but I have found ideal locations", "No"])
             
-            if st.form_submit_button("🚀 Inject Lead"):
-                # Use entered email or fallback to timestamp if empty (safety net)
-                final_email = email if email else f"test_{int(time.time())}@gmail.com"
-                
-                payload = {
-                    "lead_id": final_email, 
-                    "email": final_email, 
-                    "first_name": fname, 
-                    "last_name": lname,
-                    "phone": "254700000000", 
-                    "current_profession": prof, 
-                    "experience_years": exp,
-                    "has_business_exp": biz_exp, 
-                    "financial_readiness_input": fin,
-                    "location_county_input": county, 
-                    "location_status_input": loc,
-                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                }
-                workflow.process_incoming_lead(payload)
-                st.toast("Injected!")
-                time.sleep(1)
-                st.rerun()
+            if st.form_submit_button("🚀 Inject"):
+                # 1. Quick Validation
+                if not email or "@" not in email:
+                    st.error("⚠️ Please enter a valid email address (must contain '@').")
+                else:
+                    try:
+                        payload = {
+                            "lead_id": email, 
+                            "email": email, 
+                            "first_name": fname, 
+                            "last_name": lname, 
+                            "phone": "254700000000", 
+                            "current_profession": prof, 
+                            "experience_years": exp, 
+                            "has_business_exp": biz_exp, 
+                            "financial_readiness_input": fin, 
+                            "location_county_input": county, 
+                            "location_status_input": loc,
+                            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        }
+                        workflow.process_incoming_lead(payload)
+                        st.toast("Injected Successfully!")
+                        time.sleep(1)
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"❌ Input Error: {str(e)}")
                 
     st.divider()
     if st.button("🗑️ Reset Database"):
